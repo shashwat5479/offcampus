@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Sidebar({ joinedCommunities = [] }) {
   return (
-    <aside className="hidden w-52 shrink-0 md:block">
+    <aside className="md:block">
       <nav className="flex flex-col gap-0.5 text-sm">
         <Link href="/" className="rounded-lg px-3 py-2 font-medium text-ink hover:bg-paper">Home</Link>
         <Link href="/search" className="rounded-lg px-3 py-2 font-medium text-subtle hover:bg-paper hover:text-ink">Explore</Link>
