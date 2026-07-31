@@ -33,17 +33,26 @@ export async function POST(request) {
   }
 
   const year = Number.parseInt(body.year, 10);
-  const user = await prisma.user.create({
-    data: {
-      email,
-      username,
-      name,
-      passwordHash: hashPassword(password),
-      branch: body.branch ? String(body.branch).trim() : null,
-      year: Number.isFinite(year) ? year : null,
-      collegeId: body.collegeId || null,
-    },
-  });
+  let user;
+  try {
+    user = await prisma.user.create({
+      data: {
+        email,
+        username,
+        name,
+        passwordHash: hashPassword(password),
+        branch: body.branch ? String(body.branch).trim() : null,
+        year: Number.isFinite(year) ? year : null,
+        collegeId: body.collegeId || null,
+      },
+    });
+  } catch (e) {
+    if (e && e.code === "P2002") {
+      const field = Array.isArray(e.meta?.target) && e.meta.target.includes("email") ? "email" : "username";
+      return NextResponse.json({ error: `That ${field} is already taken.` }, { status: 409 });
+    }
+    return NextResponse.json({ error: "Could not create account." }, { status: 500 });
+  }
 
   const res = NextResponse.json({ ok: true, username: user.username });
   res.cookies.set(SESSION_COOKIE, sign(user.id), COOKIE_OPTS);

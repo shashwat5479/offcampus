@@ -9,6 +9,7 @@ export default function SubmitForm({ communities = [] }) {
     communityId: communities[0]?.id || "",
     title: "",
     body: "",
+    mediaUrl:"",
     tags: "",
   });
   const [error, setError] = useState("");
@@ -59,6 +60,7 @@ export default function SubmitForm({ communities = [] }) {
         </div>
         <input className={field} placeholder="An interesting title" value={form.title} onChange={set("title")} />
         <textarea className={`${field} resize-none`} rows={6} placeholder="Text, a link (https://…), code…" value={form.body} onChange={set("body")} />
+        <input className={field} placeholder="Image or video URL (optional)" value={form.mediaUrl} onChange={set("mediaUrl")} />
         <input className={field} placeholder="tags, comma, separated" value={form.tags} onChange={set("tags")} />
         {error && <p className="text-sm text-up">{error}</p>}
         <div className="flex justify-end gap-2">

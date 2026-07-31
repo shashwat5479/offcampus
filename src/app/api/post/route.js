@@ -23,7 +23,18 @@ export async function POST(request) {
   const community = await prisma.community.findUnique({ where: { id: communityId }, select: { id: true } });
   if (!community) return NextResponse.json({ error: "Community not found." }, { status: 404 });
 
-  const isLink = /^https?:\/\//i.test(text);
+  const mediaUrl = (body.mediaUrl || "").trim();
+  const isImage = /\.(png|jpe?g|gif|webp|avif|svg)(\?.*)?$/i.test(mediaUrl);
+  const isVideo = /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(mediaUrl);
+  let type = "TEXT";
+  let linkUrl = null;
+  if (mediaUrl) {
+    type = isImage ? "IMAGE" : isVideo ? "VIDEO" : "LINK";
+    linkUrl = mediaUrl;
+  } else if (/^https?:\/\//i.test(text)) {
+    type = "LINK";
+    linkUrl = text;
+  }
   const tags = Array.from(
     new Set(
       (body.tags || "")
@@ -38,10 +49,10 @@ export async function POST(request) {
     data: {
       authorId: user.id,
       communityId,
-      type: isLink ? "LINK" : "TEXT",
-      title,
-      body: text || null,
-      linkUrl: isLink ? text : null,
+      type,
+            title,
+            body: text || null,
+      linkUrl,
       score: 1,
       tags: { create: tags.map((tag) => ({ tag })) },
     },

@@ -8,8 +8,8 @@ export default function AuthForm({ mode, colleges = [] }) {
   const router = useRouter();
   const isSignup = mode === "signup";
   const [form, setForm] = useState({
-    email: isSignup ? "" : "you@niet.offcampus",
-    password: isSignup ? "" : "password123",
+    email: "",
+    password: "",
     name: "",
     username: "",
     collegeId: colleges[0]?.id || "",
@@ -79,11 +79,7 @@ export default function AuthForm({ mode, colleges = [] }) {
         </button>
       </div>
 
-      {!isSignup && (
-        <p className="mt-4 rounded-lg bg-canvas px-3 py-2 text-xs text-subtle">
-          Demo login is pre-filled — just press <span className="font-medium text-ink">Log in</span>.
-        </p>
-      )}
+     
 
       <p className="mt-4 text-center text-sm text-subtle">
         {isSignup ? (

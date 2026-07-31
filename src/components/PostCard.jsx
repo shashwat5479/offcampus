@@ -27,8 +27,12 @@ export default function PostCard({ post, dir = 0 }) {
         <Link href={`/post/${post.id}`} className="block">
           <h2 className="text-[15px] font-semibold leading-snug text-ink">{post.title}</h2>
           {post.body ? <p className="mt-1 line-clamp-3 text-sm text-subtle">{post.body}</p> : null}
-          {post.linkUrl ? (
-            <span className="mt-2 block truncate rounded-lg bg-canvas px-3 py-2 text-xs text-accent">🔗 {post.linkUrl}</span>
+         {post.type === "IMAGE" && post.linkUrl ? (
+            <img src={post.linkUrl} alt="" className="mt-2 max-h-[28rem] w-full rounded-lg border border-line object-cover" />
+          ) : post.type === "VIDEO" && post.linkUrl ? (
+            <video src={post.linkUrl} controls className="mt-2 max-h-[28rem] w-full rounded-lg border border-line bg-black" />
+          ) : post.linkUrl ? (
+            <a href={post.linkUrl} target="_blank" rel="noreferrer" className="mt-2 block truncate rounded-lg bg-canvas px-3 py-2 text-xs text-accent">🔗 {post.linkUrl}</a>
           ) : null}
         </Link>
 
