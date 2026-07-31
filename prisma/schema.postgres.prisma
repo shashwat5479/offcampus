@@ -1,0 +1,194 @@
+// Production target: PostgreSQL variant with native enums + UUIDs.
+// To use it: swap this file in as schema.prisma, set DATABASE_URL to your
+// Postgres URL, then `prisma migrate dev`. The application code is written
+// against string values that match these enums, so it ports cleanly.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CommunityType {
+  DEPARTMENT
+  YEAR
+  SECTION
+  CLUB
+  HOSTEL
+  PLACEMENTS
+  EVENTS
+  MARKETPLACE
+  SPORTS
+  CONFESSIONS
+  MEMES
+  PROJECTS
+  CODING
+  NOTES
+  EXAMS
+  INTERNSHIPS
+  JOBS
+  GENERAL
+}
+
+enum PostType {
+  TEXT
+  LINK
+  IMAGE
+  VIDEO
+  PDF
+  CODE
+  POLL
+}
+
+model User {
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String  @unique
+  username     String  @unique
+  passwordHash String?
+  name         String
+  branch       String?
+  year         Int?
+  bio          String?
+
+  collegeId String?  @db.Uuid
+  college   College? @relation(fields: [collegeId], references: [id])
+
+  posts        Post[]
+  comments     Comment[]
+  postVotes    PostVote[]
+  commentVotes CommentVote[]
+  memberships  Membership[]
+  following    Follow[]      @relation("follower")
+  followers    Follow[]      @relation("following")
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@index([collegeId])
+}
+
+model College {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        String      @unique
+  name        String
+  city        String?
+  users       User[]
+  communities Community[]
+}
+
+model Community {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  collegeId   String        @db.Uuid
+  college     College       @relation(fields: [collegeId], references: [id])
+  type        CommunityType
+  name        String
+  slug        String        @unique
+  description String?
+  posts       Post[]
+  members     Membership[]
+  createdAt   DateTime      @default(now())
+
+  @@index([collegeId])
+}
+
+model Membership {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id])
+  communityId String    @db.Uuid
+  community   Community @relation(fields: [communityId], references: [id])
+  role        String    @default("MEMBER")
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, communityId])
+  @@index([communityId])
+}
+
+model Post {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authorId    String    @db.Uuid
+  author      User      @relation(fields: [authorId], references: [id])
+  communityId String    @db.Uuid
+  community   Community @relation(fields: [communityId], references: [id])
+  type        PostType  @default(TEXT)
+  title       String
+  body        String?
+  linkUrl     String?
+  score       Int       @default(0)
+  comments    Comment[]
+  votes       PostVote[]
+  tags        PostTag[]
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  @@index([communityId, createdAt])
+  @@index([communityId, score])
+  @@index([authorId])
+}
+
+model Comment {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postId    String        @db.Uuid
+  post      Post          @relation(fields: [postId], references: [id])
+  authorId  String        @db.Uuid
+  author    User          @relation(fields: [authorId], references: [id])
+  parentId  String?       @db.Uuid
+  parent    Comment?      @relation("replies", fields: [parentId], references: [id])
+  replies   Comment[]     @relation("replies")
+  body      String
+  score     Int           @default(0)
+  votes     CommentVote[]
+  createdAt DateTime      @default(now())
+  deletedAt DateTime?
+
+  @@index([postId])
+  @@index([parentId])
+}
+
+model PostVote {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+  postId String @db.Uuid
+  post   Post   @relation(fields: [postId], references: [id])
+  value  Int
+
+  @@unique([userId, postId])
+  @@index([postId])
+}
+
+model CommentVote {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String  @db.Uuid
+  user      User    @relation(fields: [userId], references: [id])
+  commentId String  @db.Uuid
+  comment   Comment @relation(fields: [commentId], references: [id])
+  value     Int
+
+  @@unique([userId, commentId])
+  @@index([commentId])
+}
+
+model PostTag {
+  postId String @db.Uuid
+  post   Post   @relation(fields: [postId], references: [id])
+  tag    String
+
+  @@id([postId, tag])
+  @@index([tag])
+}
+
+model Follow {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  followerId  String   @db.Uuid
+  follower    User     @relation("follower", fields: [followerId], references: [id])
+  followingId String   @db.Uuid
+  following   User     @relation("following", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}

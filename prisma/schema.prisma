@@ -1,0 +1,172 @@
+// OffCampus — runnable schema (SQLite).
+// SQLite doesn't support native enums or arrays, so "enum" fields are Strings
+// with documented allowed values, and tags live in a PostTag join table.
+// The Postgres/production version lives in ../schema.postgres.prisma.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  username     String  @unique
+  passwordHash String
+  name         String
+  branch       String?
+  year         Int?
+  bio          String?
+
+  collegeId String?
+  college   College? @relation(fields: [collegeId], references: [id])
+
+  posts        Post[]
+  comments     Comment[]
+  postVotes    PostVote[]
+  commentVotes CommentVote[]
+  memberships  Membership[]
+  following    Follow[]      @relation("follower")
+  followers    Follow[]      @relation("following")
+
+  createdAt DateTime @default(now())
+
+  @@index([collegeId])
+}
+
+model College {
+  id   String  @id @default(cuid())
+  code String  @unique
+  name String
+  city String?
+
+  users       User[]
+  communities Community[]
+}
+
+model Community {
+  id          String  @id @default(cuid())
+  collegeId   String
+  college     College @relation(fields: [collegeId], references: [id])
+  type        String // CODING | PLACEMENTS | GENERAL | MEMES | CONFESSIONS | NOTES | MARKETPLACE | SECTION ...
+  name        String
+  slug        String  @unique // globally unique, e.g. "niet-coding"
+  description String?
+
+  posts   Post[]
+  members Membership[]
+
+  createdAt DateTime @default(now())
+
+  @@index([collegeId])
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id])
+  role        String    @default("MEMBER")
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, communityId])
+  @@index([communityId])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id])
+
+  type    String  @default("TEXT") // TEXT | LINK | IMAGE | PDF | CODE
+  title   String
+  body    String?
+  linkUrl String?
+
+  // Denormalized net score. Adjusted by a delta on each vote so seeded
+  // baselines are preserved.
+  score Int @default(0)
+
+  comments Comment[]
+  votes    PostVote[]
+  tags     PostTag[]
+
+  createdAt DateTime @default(now())
+
+  @@index([communityId])
+  @@index([authorId])
+}
+
+model Comment {
+  id       String    @id @default(cuid())
+  postId   String
+  post     Post      @relation(fields: [postId], references: [id])
+  authorId String
+  author   User      @relation(fields: [authorId], references: [id])
+  parentId String?
+  parent   Comment?  @relation("replies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("replies")
+  body     String
+  score    Int       @default(0)
+
+  votes CommentVote[]
+
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([parentId])
+}
+
+model PostVote {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+  value  Int // 1 or -1
+
+  @@unique([userId, postId])
+  @@index([postId])
+}
+
+model CommentVote {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id])
+  value     Int
+
+  @@unique([userId, commentId])
+  @@index([commentId])
+}
+
+model PostTag {
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+  tag    String
+
+  @@id([postId, tag])
+  @@index([tag])
+}
+
+model Follow {
+  id          String @id @default(cuid())
+  followerId  String
+  follower    User   @relation("follower", fields: [followerId], references: [id])
+  followingId String
+  following   User   @relation("following", fields: [followingId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}

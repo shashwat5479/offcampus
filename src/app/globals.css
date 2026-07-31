@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: #fafafa;
+  color: #15171c;
+}
+
+/* thin, quiet scrollbars to match the restrained look */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d6d8dc transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #d6d8dc;
+  border-radius: 999px;
+}
+
+a {
+  color: inherit;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
