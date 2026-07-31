@@ -50,7 +50,7 @@ export default async function HomePage({ searchParams }) {
   const joinedCommunities = graph.communities.filter((c) => viewer.joined.has(c.id));
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col gap-4 md:flex-row md:gap-6">
       <Sidebar joinedCommunities={joinedCommunities} />
 
       <div className="min-w-0 flex-1">
