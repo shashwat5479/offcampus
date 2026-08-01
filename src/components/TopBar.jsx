@@ -24,7 +24,7 @@ export default function TopBar({ user }) {
     <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-shell items-center gap-3 px-4">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-sm font-bold text-white"><img src="/logo.jpeg" alt="OffCampus" className="h-8 w-8 rounded-lg object-contain" /></span>
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-sm font-bold text-white"><img src="/logo.png" alt="OffCampus" className="h-8 w-8 rounded-lg object-contain" /></span>
           <span className="hidden text-[17px] font-semibold tracking-tight text-ink sm:block">OffCampus</span>
         </Link>
 
