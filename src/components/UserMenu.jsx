@@ -30,35 +30,62 @@ export default function UserMenu({ user }) {
     router.push("/login");
     router.refresh();
   }
-
   return (
     <div className="relative" ref={ref}>
-      <button onClick={() => setOpen((o) => !o)} aria-label="Settings" className="rounded-full p-2 text-subtle hover:text-ink">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
+      {/* trigger = profile picture */}
+      <button onClick={() => setOpen((o) => !o)} aria-label="Profile">
+        <Avatar name={user.name} seed={user.username} src={user.avatarUrl} size={34} />
       </button>
+
       {open && (
-        <div className="absolute right-0 mt-2 w-52 rounded-xl border border-line bg-paper p-1 shadow-lg">
-          <Link href={`/u/${user.username}`} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink hover:bg-canvas">
-            <Avatar name={user.name} seed={user.username} src={user.avatarUrl} size={28} />
-            <span className="truncate">@{user.username}</span>
+        <div className="absolute right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-line bg-paper shadow-xl">
+          {/* header: big avatar + name */}
+          <Link href={`/u/${user.username}`} onClick={() => setOpen(false)} className="flex flex-col items-center gap-2 border-b border-line px-4 py-5 hover:bg-canvas">
+            <Avatar name={user.name} seed={user.username} src={user.avatarUrl} size={72} />
+            <div className="text-center">
+              <div className="text-sm font-semibold text-ink">{user.name}</div>
+              <div className="text-xs text-subtle">@{user.username}</div>
+            </div>
           </Link>
-          <Link href="/settings" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-ink hover:bg-canvas">Edit profile</Link>
-          <button onClick={toggleTheme} className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-ink hover:bg-canvas">
-            <span className="flex items-center gap-2">
+
+          {/* rows */}
+          <div className="p-1">
+            <Link href="/settings" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-subtle"><circle cx="12" cy="8" r="4"/><path d="M6 21v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1"/></svg>
+              <div>
+                <div className="text-sm font-medium text-ink">Profile</div>
+                <div className="text-xs text-subtle">Name, profile picture, bio</div>
+              </div>
+            </Link>
+
+            <Link href="/settings" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-subtle"><path d="m21 2-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></svg>
+              <div>
+                <div className="text-sm font-medium text-ink">Account</div>
+                <div className="text-xs text-subtle">Password, account info</div>
+              </div>
+            </Link>
+
+            <button onClick={toggleTheme} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
               {dark ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-subtle"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-subtle"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
               )}
-              Dark mode
-            </span>
-            <span className="text-xs text-subtle">{dark ? "On" : "Off"}</span>
-          </button>
-          <button onClick={logout} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-up hover:bg-canvas">Log out</button>
+              <div className="flex-1 text-left">
+                <div className="text-sm font-medium text-ink">Dark mode</div>
+                <div className="text-xs text-subtle">Theme appearance</div>
+              </div>
+              <span className="text-xs text-subtle">{dark ? "On" : "Off"}</span>
+            </button>
+
+            <button onClick={logout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-up"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              <div className="text-sm font-medium text-up">Log out</div>
+            </button>
+          </div>
         </div>
       )}
     </div>
-  );}
+  );
+}
