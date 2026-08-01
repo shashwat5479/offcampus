@@ -50,9 +50,7 @@ export default function TopBar({ user }) {
               >
                 New post
               </Link>
-              <Link href={`/u/${user.username}`} className="rounded-full px-2.5 py-1.5 text-sm font-medium text-subtle hover:text-ink">
-                @{user.username}
-              </Link>
+                <Link href="/settings" className="rounded-full px-2.5 py-1.5 text-sm text-subtle hover:text-ink">Settings</Link>
               <button onClick={logout} className="rounded-full px-2.5 py-1.5 text-sm text-subtle hover:text-ink">
                 Log out
               </button>

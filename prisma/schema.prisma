@@ -21,6 +21,7 @@ model User {
   branch       String?
   year         Int?
   bio          String?
+  avatarUrl    String?
 
   collegeId String?
   college   College? @relation(fields: [collegeId], references: [id])

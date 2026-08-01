@@ -16,7 +16,10 @@ function initials(name = "") {
     .toUpperCase();
 }
 
-export default function Avatar({ name = "?", seed, size = 36 }) {
+export default function Avatar({ name = "?", seed, size = 36, src }) {
+  if (src) {
+    return <img src={src} alt={name} style={{ width: size, height: size }} className="inline-block shrink-0 rounded-full object-cover" />;
+  }
   return (
     <span
       className="inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white"

@@ -50,7 +50,7 @@ export default async function ProfilePage({ params }) {
     <div className="mx-auto max-w-feed">
       <div className="rounded-xl2 border border-line bg-paper p-5">
         <div className="flex items-center gap-4">
-          <Avatar name={user.name} seed={user.id} size={64} />
+          <Avatar name={user.name} seed={user.id} src={user.avatarUrl}size={64} />
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-lg font-semibold tracking-tight">{user.name}</h1>
             <p className="text-sm text-subtle">
