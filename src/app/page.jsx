@@ -53,7 +53,7 @@ export default async function HomePage({ searchParams }) {
     <div className="flex flex-col gap-4 md:flex-row md:gap-6">
       <Sidebar joinedCommunities={joinedCommunities} />
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 md:max-w-2xl">
         <div className="mb-3">
           <FeedTabs active={sort} basePath="/" />
         </div>

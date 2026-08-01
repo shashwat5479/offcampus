@@ -32,9 +32,9 @@ export default async function CommunityPage({ params, searchParams }) {
   const ranked = rankFeed(inCommunity, sort, ctx).map((p) => graph.postById[p.id]);
 
   return (
-    <div className="mx-auto max-w-feed">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 md:flex-row md:items-start">
       <div className="mb-3 flex items-center gap-3 rounded-xl2 border border-line bg-paper p-4">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 md:mx-auto md:*:max-w-2xl">
           <h1 className="truncate text-lg font-semibold tracking-tight">
             {community.college?.code} · {community.name}
           </h1>

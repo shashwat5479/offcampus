@@ -5,7 +5,7 @@ import FollowButton from "./FollowButton";
 
 export default function SuggestPanel({ communities = [], people = [], trending = [] }) {
   return (
-    <aside className="lg:block">
+    <aside className="hidden w-72 shrink-0 lg:block">
       <div className="flex flex-col gap-4">
         <section className="rounded-xl2 border border-line bg-paper p-4">
           <h3 className="mb-3 text-sm font-semibold text-ink">Suggested communities</h3>
