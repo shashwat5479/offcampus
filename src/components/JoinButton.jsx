@@ -34,7 +34,7 @@ export default function JoinButton({ communityId, joined, size = "sm" }) {
     <button
       onClick={toggle}
       className={`rounded-full border font-semibold transition-colors ${pad} ${
-        on ? "border-line bg-paper text-subtle" : "border-ink bg-ink text-white"
+        on ? "border-line bg-paper text-subtle" : "border-ink bg-ink text-paper"
       }`}
     >
       {on ? "Joined" : "Join"}

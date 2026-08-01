@@ -46,7 +46,7 @@ export default function CommentForm({ postId, loggedIn }) {
         placeholder="Add a comment…"
         className="flex-1 rounded-lg border border-line bg-canvas px-3 py-2 text-sm outline-none focus:border-ink"
       />
-      <button onClick={submit} disabled={busy} className="rounded-lg bg-ink px-4 text-sm font-medium text-white disabled:opacity-50">
+      <button onClick={submit} disabled={busy} className="rounded-lg bg-ink px-4 text-sm font-medium text-paper disabled:opacity-50">
         {busy ? "…" : "Reply"}
       </button>
     </div>
