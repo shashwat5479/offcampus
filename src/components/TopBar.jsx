@@ -25,7 +25,7 @@ export default function TopBar({ user }) {
       <div className="mx-auto flex h-14 max-w-shell items-center gap-3 px-4">
         <Link href="/" className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-sm font-bold text-white">O</span>
-          <span className="hidden text-[17px] font-semibold tracking-tight sm:block">OffCampus</span>
+          <span className="hidden text-[17px] font-semibold tracking-tight text-ink sm:block">OffCampus</span>
         </Link>
 
         <div className="flex h-9 flex-1 items-center gap-2 rounded-full border border-line bg-canvas px-3 sm:max-w-sm">
@@ -48,7 +48,7 @@ export default function TopBar({ user }) {
             <>
               <Link
                 href="/submit"
-                className="hidden rounded-full bg-ink px-3.5 py-1.5 text-sm font-medium text-white sm:inline-block"
+                className="hidden rounded-full bg-ink px-3.5 py-1.5 text-sm font-medium text-paper sm:inline-block"
               >
                 New post
               </Link>
