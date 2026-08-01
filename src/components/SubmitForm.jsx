@@ -93,7 +93,7 @@ export default function SubmitForm({ communities = [] }) {
         {error && <p className="text-sm text-up">{error}</p>}
         <div className="flex justify-end gap-2">
           <button onClick={() => router.back()} className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-subtle">Cancel</button>
-          <button onClick={submit} disabled={busy} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+          <button onClick={submit} disabled={busy} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper disabled:opacity-50">
             {busy ? "Publishing…" : "Publish"}
           </button>
         </div>

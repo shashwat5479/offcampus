@@ -74,7 +74,7 @@ export default function SettingsForm({ initial }) {
             <input className={field} placeholder="Branch (e.g. CSE)" value={form.branch} onChange={set("branch")} />
             <input className={field} placeholder="Year" value={form.year} onChange={set("year")} />
           </div>
-          <button onClick={saveProfile} className="self-start rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white">Save profile</button>
+          <button onClick={saveProfile} className="self-start rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper">Save profile</button>
         </div>
       </section>
 
@@ -83,7 +83,7 @@ export default function SettingsForm({ initial }) {
         <div className="flex flex-col gap-3">
           <input className={field} type="password" placeholder="Current password" value={pw.currentPassword} onChange={setP("currentPassword")} />
           <input className={field} type="password" placeholder="New password" value={pw.newPassword} onChange={setP("newPassword")} />
-          <button onClick={changePassword} className="self-start rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white">Update password</button>
+          <button onClick={changePassword} className="self-start rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper">Update password</button>
         </div>
       </section>
 
