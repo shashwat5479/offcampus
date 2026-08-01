@@ -12,6 +12,7 @@ export default function SettingsForm({ initial }) {
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
+  const[showPw, setShowPw] = useState(false);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   const setP = (k) => (e) => setPw({ ...pw, [k]: e.target.value });
   const field = "w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm outline-none focus:border-ink";
@@ -79,12 +80,19 @@ export default function SettingsForm({ initial }) {
       </section>
 
       <section className="rounded-xl2 border border-line bg-paper p-5">
-        <h2 className="mb-4 text-sm font-semibold">Change password</h2>
-        <div className="flex flex-col gap-3">
-          <input className={field} type="password" placeholder="Current password" value={pw.currentPassword} onChange={setP("currentPassword")} />
-          <input className={field} type="password" placeholder="New password" value={pw.newPassword} onChange={setP("newPassword")} />
-          <button onClick={changePassword} className="self-start rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper">Update password</button>
-        </div>
+        <h2 className="mb-4 text-sm font-semibold">Password</h2>
+        {!showPw ? (
+          <button onClick={() => setShowPw(true)} className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-subtle">Change password</button>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <input className={field} type="password" placeholder="Current password" value={pw.currentPassword} onChange={setP("currentPassword")} />
+            <input className={field} type="password" placeholder="New password" value={pw.newPassword} onChange={setP("newPassword")} />
+            <div className="flex gap-2">
+              <button onClick={changePassword} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper">Update password</button>
+              <button onClick={() => { setShowPw(false); setPw({ currentPassword: "", newPassword: "" }); }} className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-subtle">Cancel</button>
+            </div>
+          </div>
+        )}
       </section>
 
       {err && <p className="text-sm text-up">{err}</p>}

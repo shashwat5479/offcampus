@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ThemeToggle from "./ThemeToggle";
+import UserMenu from "./UserMenu";
+
 
 export default function TopBar({ user }) {
   const router = useRouter();
@@ -46,11 +48,8 @@ export default function TopBar({ user }) {
           <ThemeToggle />
           {user ? (
             <>
-              <Link
-                href="/submit"
-                className="hidden rounded-full bg-ink px-3.5 py-1.5 text-sm font-medium text-paper sm:inline-block"
-              >
-                New post
+              <Link href="/submit" aria-label="New post" className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
               </Link>
                 <Link href="/settings" className="rounded-full px-2.5 py-1.5 text-sm text-subtle hover:text-ink">Settings</Link>
               <button onClick={logout} className="rounded-full px-2.5 py-1.5 text-sm text-subtle hover:text-ink">
