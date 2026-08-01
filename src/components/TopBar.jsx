@@ -37,10 +37,13 @@ export default function TopBar({ user }) {
         </div>
 
         <nav className="ml-auto flex items-center gap-1">
-          <Link href="/submit" aria-label="New post" className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+          <Link href="/submit" aria-label="New post" className="flex h-9 w-9 items-center justify-center rounded-full text-subtle hover:bg-canvas hover:text-ink">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
           </Link>
-          {user ? (
+<button aria-label="Notifications" className="flex h-9 w-9 items-center justify-center rounded-full text-subtle hover:bg-canvas hover:text-ink">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          </button>         
+           {user ? (
             <UserMenu user={user} />
           ) : (
             <Link href="/login" className="rounded-full bg-ink px-4 py-1.5 text-sm font-medium text-paper">Log in</Link>
