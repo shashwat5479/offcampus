@@ -17,7 +17,7 @@ export default function FeedTabs({ active, basePath = "/" }) {
             key={id}
             href={`${basePath}?sort=${id}`}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-              on ? "bg-ink text-white" : "text-subtle hover:text-ink"
+              on ? "bg-ink text-paper" : "text-subtle hover:text-ink"
             }`}
           >
             {label}
