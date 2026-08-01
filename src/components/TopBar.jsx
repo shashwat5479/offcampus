@@ -43,24 +43,11 @@ export default function TopBar({ user }) {
             className="w-full bg-transparent text-sm outline-none placeholder:text-faint"
           />
         </div>
-
-        <nav className="ml-auto flex items-center gap-1">
-          <ThemeToggle />
-          {user ? (
-            <>
-              <Link href="/submit" aria-label="New post" className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
-              </Link>
-                <Link href="/settings" className="rounded-full px-2.5 py-1.5 text-sm text-subtle hover:text-ink">Settings</Link>
-              <button onClick={logout} className="rounded-full px-2.5 py-1.5 text-sm text-subtle hover:text-ink">
-                Log out
-              </button>
-            </>
-          ) : (
-            <Link href="/login" className="rounded-full bg-ink px-4 py-1.5 text-sm font-medium text-white">
-              Log in
-            </Link>
-          )}
+<nav className="ml-auto flex items-center gap-1">
+          <Link href="/submit" aria-label="New post" className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </Link>
+          {user ? <UserMenu user={user} /> : <Link href="/login" className="rounded-full bg-ink px-4 py-1.5 text-sm font-medium text-paper">Log in</Link>}
         </nav>
       </div>
     </header>
