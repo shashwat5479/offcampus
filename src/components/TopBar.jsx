@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ThemeToggle from "./ThemeToggle";
 
 export default function TopBar({ user }) {
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function TopBar({ user }) {
         </div>
 
         <nav className="ml-auto flex items-center gap-1">
+          <ThemeToggle />
           {user ? (
             <>
               <Link

@@ -10,8 +10,14 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   const user = await getCurrentUser();
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-canvas text-ink font-sans">
+       <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}",
+          }}
+        />
         <TopBar user={user ? { username: user.username, name: user.name } : null} />
         <main className="mx-auto w-full max-w-shell px-4 py-6">{children}</main>
       </body>

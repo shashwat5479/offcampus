@@ -1,17 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+:root {
+  --c-ink: 21 23 28;
+  --c-subtle: 107 114 128;
+  --c-faint: 154 161 171;
+  --c-line: 236 236 238;
+  --c-paper: 255 255 255;
+  --c-canvas: 250 250 250;
+  --c-accent: 59 91 253;
+  --c-up: 232 84 58;
+}
+.dark {
+  --c-ink: 232 234 238;
+  --c-subtle: 152 163 178;
+  --c-faint: 107 118 134;
+  --c-line: 35 40 51;
+  --c-paper: 19 22 28;
+  --c-canvas: 10 12 16;
+  --c-accent: 139 125 255;
+  --c-up: 255 106 69;
+}
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-
 body {
-  background: #fafafa;
-  color: #15171c;
+  background: rgb(var(--c-canvas));
+  color: rgb(var(--c-ink));
 }
-
 /* thin, quiet scrollbars to match the restrained look */
 * {
   scrollbar-width: thin;

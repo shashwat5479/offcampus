@@ -49,7 +49,7 @@ export default function VoteButtons({ postId, initialScore, initialDir = 0 }) {
           <path d="M12 5l7 8h-4v6H9v-6H5z" />
         </svg>
       </button>
-      <span className="text-sm font-semibold tabular-nums" style={{ color: dir === 1 ? "#e8543a" : dir === -1 ? "#3b5bfd" : "#15171c" }}>
+      <span className="text-sm font-semibold tabular-nums" style={{ color: dir === 1 ? "#e8543a" : dir === -1 ? "#3b5bfd" : "rgb(var(--c-ink))" }}>
         {score >= 1000 ? (score / 1000).toFixed(1).replace(/\.0$/, "") + "k" : score}
       </span>
       <button
