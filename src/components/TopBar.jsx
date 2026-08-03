@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import UserMenu from "./UserMenu";
 
-export default function TopBar({ user }) {
+export default function TopBar({ user, unread }) {
   const router = useRouter();
   const [q, setQ] = useState("");
 
