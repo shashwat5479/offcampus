@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { notify } from "@/lib/notify";
 
 export async function POST(request) {
   const user = await getCurrentUser();
@@ -36,6 +37,10 @@ export async function POST(request) {
     }
     const post = await prisma.post.update({ where: { id }, data: { score: { increment: delta } } });
     return NextResponse.json({ ok: true, score: post.score, dir: next });
+    if (next === 1) {
+      await notify({ userId: post.authorId, actorId: user.id, type: "POST_VOTE", postId: id });
+    }
+    return NextResponse.json({ ok: true, score: post.score, dir: next }); 
   }
 
   // comment
@@ -50,6 +55,9 @@ export async function POST(request) {
     if (existing) await prisma.commentVote.delete({ where: { id: existing.id } });
   } else if (existing) {
     await prisma.commentVote.update({ where: { id: existing.id }, data: { value: next } });
+    if (next === 1) {
+      await notify({ userId: comment.authorId, actorId: user.id, type: "COMMENT_VOTE", commentId: id });
+    }
   } else {
     await prisma.commentVote.create({ data: { userId: user.id, commentId: id, value: next } });
   }

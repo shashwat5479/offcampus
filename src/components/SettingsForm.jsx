@@ -5,6 +5,22 @@ import { useRouter } from "next/navigation";
 import Avatar from "./Avatar";
 
 export default function SettingsForm({ initial }) {
+  const [notif, setNotif] = useState({
+    notifyFollow: initial.notifyFollow ?? true,
+    notifyComment: initial.notifyComment ?? true,
+    notifyReply: initial.notifyReply ?? true,
+    notifyVote: initial.notifyVote ?? true,
+  });
+
+  async function saveNotif(next) {
+    setNotif(next);
+    await fetch("/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(next),
+    });
+    router.refresh();
+  }
   const router = useRouter();
   const fileRef = useRef(null);
   const [form, setForm] = useState(initial);
@@ -52,10 +68,32 @@ export default function SettingsForm({ initial }) {
     if (!res.ok) { setErr(data.error || "Could not change password."); return; }
     setMsg("Password changed."); setPw({ currentPassword: "", newPassword: "" });
   }
+  
 
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
+      <section className="rounded-xl2 border border-line bg-paper p-5">
+        <h2 className="mb-3 text-sm font-semibold">Notifications</h2>
+        <div className="flex flex-col divide-y divide-line">
+          {[
+            ["notifyFollow", "New followers"],
+            ["notifyComment", "Comments on my posts"],
+            ["notifyReply", "Replies to my comments"],
+            ["notifyVote", "Upvotes on my posts"],
+          ].map(([key, label]) => (
+            <label key={key} className="flex cursor-pointer items-center justify-between py-2.5 text-sm text-ink">
+              <span>{label}</span>
+              <input
+                type="checkbox"
+                checked={notif[key]}
+                onChange={(e) => saveNotif({ ...notif, [key]: e.target.checked })}
+                className="h-4 w-4 accent-accent"
+              />
+            </label>
+          ))}
+        </div>
+      </section>
 
       <section className="rounded-xl2 border border-line bg-paper p-5">
         <h2 className="mb-4 text-sm font-semibold">Profile</h2>

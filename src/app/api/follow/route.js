@@ -1,3 +1,4 @@
+import {notify} from "@/lib/notify";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
@@ -26,5 +27,6 @@ export async function POST(request) {
     return NextResponse.json({ ok: true, following: false });
   }
   await prisma.follow.create({ data: { followerId: user.id, followingId: targetId } });
+  await notify({ userId: targetId, actorId: user.id, type: "FOLLOW" });
   return NextResponse.json({ ok: true, following: true });
 }

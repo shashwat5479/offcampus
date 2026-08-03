@@ -7,13 +7,17 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const initial = {
+ const initial = {
     name: user.name || "",
     username: user.username,
     bio: user.bio || "",
     branch: user.branch || "",
     year: user.year || "",
     avatarUrl: user.avatarUrl || "",
+    notifyFollow: user.notifyFollow,
+    notifyComment: user.notifyComment,
+    notifyReply: user.notifyReply,
+    notifyVote: user.notifyVote,
   };
   return (
     <div className="mx-auto max-w-feed">

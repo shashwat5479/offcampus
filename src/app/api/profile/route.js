@@ -29,6 +29,9 @@ export async function POST(request) {
     data.year = Number.isFinite(y) ? y : null;
   }
   if (typeof body.avatarUrl === "string" && body.avatarUrl) data.avatarUrl = body.avatarUrl;
+  for (const k of ["notifyFollow", "notifyComment", "notifyReply", "notifyPostVote", "notifyCommentVote"]) {
+    if (body[k] !== undefined) data[k] = !!body[k];
+  }
 
   if (Object.keys(data).length) await prisma.user.update({ where: { id: user.id }, data });
   return NextResponse.json({ ok: true });
