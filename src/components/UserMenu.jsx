@@ -53,16 +53,8 @@ export default function UserMenu({ user }) {
             <Link href="/settings" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-subtle"><circle cx="12" cy="8" r="4" /><path d="M6 21v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1" /></svg>
               <div>
-                <div className="text-sm font-medium text-ink">Profile</div>
-                <div className="text-xs text-subtle">Name, profile picture, bio</div>
-              </div>
-            </Link>
-
-            <Link href="/settings" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-canvas">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-subtle"><path d="m21 2-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3" /></svg>
-              <div>
-                <div className="text-sm font-medium text-ink">Account</div>
-                <div className="text-xs text-subtle">Password, account info</div>
+                <div className="text-sm font-medium text-ink">Settings</div>
+                <div className="text-xs text-subtle">Profile, account, notifications</div>
               </div>
             </Link>
 
