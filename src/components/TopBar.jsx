@@ -40,6 +40,9 @@ export default function TopBar({ user, unread }) {
           <Link href="/submit" aria-label="New post" className="flex h-9 w-9 items-center justify-center rounded-full text-subtle hover:bg-canvas hover:text-ink">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
           </Link>
+          <Link href="/messages" aria-label="Messages" className="flex h-9 w-9 items-center justify-center rounded-full text-subtle hover:bg-canvas hover:text-ink">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </Link>
           <Link href="/notifications" aria-label="Notifications" className="relative flex h-9 w-9 items-center justify-center rounded-full text-subtle hover:bg-canvas hover:text-ink">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>
             {unread > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-up"></span>}

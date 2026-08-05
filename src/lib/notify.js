@@ -7,6 +7,7 @@ const PREF = {
   REPLY: "notifyReply",
   POST_VOTE: "notifyVote",
   COMMENT_VOTE: "notifyVote",
+  MESSAGE: "notifyMessage",
 };
 
 export async function notify({ userId, actorId, type, postId = null, commentId = null }) {

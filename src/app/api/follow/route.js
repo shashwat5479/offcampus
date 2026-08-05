@@ -26,7 +26,16 @@ export async function POST(request) {
     await prisma.follow.delete({ where: { id: existing.id } });
     return NextResponse.json({ ok: true, following: false });
   }
-  await prisma.follow.create({ data: { followerId: user.id, followingId: targetId } });
-  await notify({ userId: targetId, actorId: user.id, type: "FOLLOW" });
-  return NextResponse.json({ ok: true, following: true });
+  const target = await prisma.user.findUnique({ where: { id: targetId }, select: { isPrivate: true } });
+  const status = target?.isPrivate ? "PENDING" : "ACCEPTED";
+
+  await prisma.follow.create({ data: { followerId: user.id, followingId: targetId, status } });
+
+  await notify({
+    userId: targetId,
+    actorId: user.id,
+    type: status === "PENDING" ? "FOLLOW_REQUEST" : "FOLLOW",
+  });
+
+  return NextResponse.json({ ok: true, following: status === "ACCEPTED", requested: status === "PENDING" });
 }

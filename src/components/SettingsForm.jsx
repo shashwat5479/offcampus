@@ -69,7 +69,12 @@ export default function SettingsForm({ initial }) {
     setMsg("Password changed."); setPw({ currentPassword: "", newPassword: "" });
   }
   
-
+const [isPrivate, setIsPrivate] = useState(initial.isPrivate ?? false);
+  async function savePrivacy(v) {
+    setIsPrivate(v);
+    await fetch("/api/profile", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isPrivate: v }) });
+    router.refresh();
+  }
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
@@ -94,6 +99,16 @@ export default function SettingsForm({ initial }) {
           ))}
         </div>
       </section>
+
+      <section className="rounded-xl2 border border-line bg-paper p-5">
+        <h2 className="mb-1 text-sm font-semibold">Account privacy</h2>
+        <label className="flex cursor-pointer items-center justify-between py-2 text-sm text-ink">
+          <span>Private account <span className="text-xs text-subtle">— people must request to follow you</span></span>
+          <input type="checkbox" checked={isPrivate} onChange={(e) => savePrivacy(e.target.checked)} className="h-4 w-4 accent-accent" />
+        </label>
+      </section>
+
+
 
       <section className="rounded-xl2 border border-line bg-paper p-5">
         <h2 className="mb-4 text-sm font-semibold">Profile</h2>

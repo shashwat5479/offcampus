@@ -24,6 +24,7 @@ export async function POST(request) {
   if (typeof body.name === "string" && body.name.trim()) data.name = body.name.trim();
   if (typeof body.bio === "string") data.bio = body.bio.trim() || null;
   if (typeof body.branch === "string") data.branch = body.branch.trim() || null;
+  if (typeof body.isPrivate === "boolean") data.isPrivate = body.isPrivate;
   if (body.year !== undefined) {
     const y = Number.parseInt(body.year, 10);
     data.year = Number.isFinite(y) ? y : null;

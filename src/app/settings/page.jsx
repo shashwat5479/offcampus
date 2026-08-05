@@ -18,6 +18,7 @@ export default async function SettingsPage() {
     notifyComment: user.notifyComment,
     notifyReply: user.notifyReply,
     notifyVote: user.notifyVote,
+    isPrivate: user.isPrivate,
   };
   return (
     <div className="mx-auto max-w-feed">

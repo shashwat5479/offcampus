@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import Avatar from "@/components/Avatar";
 import FollowButton from "@/components/FollowButton";
 import PostCard from "@/components/PostCard";
+import MessageButton from "@/components/MessageButton";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,8 @@ export default async function ProfilePage({ params }) {
     },
   });
   if (!user) notFound();
+  const followers = await prisma.follow.count({ where: { followingId: user.id, status: "ACCEPTED" } });
+  const following = await prisma.follow.count({ where: { followerId: user.id, status: "ACCEPTED" } });
 
   const posts = await prisma.post.findMany({
     where: { authorId: user.id },
@@ -50,7 +53,7 @@ export default async function ProfilePage({ params }) {
     <div className="mx-auto max-w-feed">
       <div className="rounded-xl2 border border-line bg-paper p-5">
         <div className="flex items-center gap-4">
-          <Avatar name={user.name} seed={user.id} src={user.avatarUrl}size={64} />
+          <Avatar name={user.name} seed={user.id} src={user.avatarUrl} size={64} />
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-lg font-semibold tracking-tight">{user.name}</h1>
             <p className="text-sm text-subtle">
@@ -60,11 +63,16 @@ export default async function ProfilePage({ params }) {
               {user.year ? ` · Year ${user.year}` : ""}
             </p>
             <p className="mt-1 text-xs text-faint">
-              {user._count.followers} followers · {user._count.following} following · {user._count.posts} posts
+              {followers} followers · {following} following · {user._count.posts} posts
+              
             </p>
           </div>
-          {!isMe && <FollowButton userId={user.id} following={iFollow} size="lg" />}
-        </div>
+{!isMe && (
+  <div className="flex items-center gap-2">
+    <FollowButton userId={user.id} following={iFollow} size="lg" />
+    <MessageButton otherId={user.id} />
+  </div>
+)}        </div>
         {user.bio ? <p className="mt-3 text-sm text-ink">{user.bio}</p> : null}
       </div>
 

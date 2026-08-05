@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import Avatar from "@/components/Avatar";
 import { timeAgo } from "@/lib/format";
-
+import RequestActions from "@/components/RequestActions";
 export const dynamic = "force-dynamic";
 
 const TEXT = {
@@ -13,6 +13,9 @@ const TEXT = {
   REPLY: "replied to your comment",
   POST_VOTE: "upvoted your post",
   COMMENT_VOTE: "upvoted your comment",
+  FOLLOW_REQUEST: "requested to follow you",
+  FOLLOW_ACCEPTED: "accepted your follow request",
+    MESSAGE: "sent you a message",
 };
 
 export default async function NotificationsPage() {
@@ -47,6 +50,7 @@ export default async function NotificationsPage() {
               <span className="font-semibold">@{n.actor.username}</span> {TEXT[n.type] || "interacted"}
             </div>
             <span className="text-xs text-faint">{timeAgo(n.createdAt)}</span>
+            {n.type === "FOLLOW_REQUEST" && <RequestActions requesterId={n.actor.id} />}
           </Link>
         ))}
       </div>

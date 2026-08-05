@@ -33,11 +33,15 @@ model User {
 
   notifications      Notification[] @relation("recipient")
   actedNotifications Notification[] @relation("actor")
+  Conversational1    Conversation[] @relation("conv1")
+  Conversational2    Conversation[] @relation("conv2")
+  messages           Message[]        @relation("sender")
   notifyFollow       Boolean        @default(true)
   notifyComment      Boolean        @default(true)
   notifyReply        Boolean        @default(true)
   notifyVote         Boolean        @default(true)
-
+  isPrivate          Boolean        @default(false)
+  notifyMessage      Boolean        @default(true)
   createdAt DateTime @default(now())
 
   @@index([collegeId])
@@ -167,7 +171,7 @@ model Follow {
   follower    User   @relation("follower", fields: [followerId], references: [id])
   followingId String
   following   User   @relation("following", fields: [followingId], references: [id])
-
+  status      String @default("ACCEPTED")
   createdAt DateTime @default(now())
 
   @@unique([followerId, followingId])
@@ -188,4 +192,32 @@ model Notification {
 
   @@index([userId, read])
   @@index([userId, createdAt])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  user1Id   String
+  user1     User      @relation("conv1", fields: [user1Id], references: [id])
+  user2Id   String
+  user2     User      @relation("conv2", fields: [user2Id], references: [id])
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation("sender", fields: [senderId], references: [id])
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
 }
