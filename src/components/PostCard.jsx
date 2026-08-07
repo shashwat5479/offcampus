@@ -31,9 +31,9 @@ export default function PostCard({ post, dir = 0 }) {
 
         {post.type === "IMAGE" && post.linkUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.linkUrl} alt="" className="mt-2 max-h-[28rem] w-full rounded-lg border border-line object-cover" />
+          <img src={post.linkUrl} alt="" className="w-full rounded-xl border border-line object-contain" />
         ) : post.type === "VIDEO" && post.linkUrl ? (
-          <video src={post.linkUrl} controls className="mt-2 max-h-[28rem] w-full rounded-lg border border-line bg-black" />
+          <video src={post.linkUrl} controls className="w-full rounded-xl border border-line object-contain"/>
         ) : post.linkUrl ? (
           <a href={post.linkUrl} target="_blank" rel="noreferrer" className="mt-2 block truncate rounded-lg bg-canvas px-3 py-2 text-xs text-accent">🔗 {post.linkUrl}</a>
         ) : null}

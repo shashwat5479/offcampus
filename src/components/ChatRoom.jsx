@@ -97,6 +97,21 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         <div className="flex flex-col gap-2">
           {messages.map((m) => {
             const mine = m.senderId === meId;
+            if (m.storyMediaUrl) {
+              return (
+                <div key={m.id} className={`flex max-w-[75%] flex-col gap-1 ${mine ? "items-end self-end" : "items-start self-start"}`}>
+                  <span className="text-[11px] text-faint">{mine ? "You replied to their story" : "Replied to your story"}</span>
+                  <div className="overflow-hidden rounded-2xl border border-line">
+                    {m.storyMediaType === "VIDEO" ? (
+                      <video src={m.storyMediaUrl} muted className="h-40 w-28 object-cover" />
+                    ) : (
+                      <img src={m.storyMediaUrl} alt="" className="h-40 w-28 object-cover" />
+                    )}
+                  </div>
+                  <div className={`rounded-2xl px-3 py-2 text-sm ${mine ? "bg-ink text-paper" : "bg-canvas text-ink"}`}>{m.body}</div>
+                </div>
+              );
+            }
             return (
               <div key={m.id} className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${mine ? "self-end bg-ink text-paper" : "self-start bg-canvas text-ink"}`}>
                 {m.body}

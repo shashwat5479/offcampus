@@ -19,7 +19,7 @@ model User {
   year         Int?
   bio          String?
   avatarUrl    String?
-
+  storyReactions StoryReaction[]
   collegeId String?
   college   College? @relation(fields: [collegeId], references: [id])
 
@@ -30,7 +30,7 @@ model User {
   memberships  Membership[]
   following    Follow[]      @relation("follower")
   followers    Follow[]      @relation("following")
-
+  stories      Story[]       @relation("authorStories")
   notifications      Notification[] @relation("recipient")
   actedNotifications Notification[] @relation("actor")
   Conversational1    Conversation[] @relation("conv1")
@@ -218,6 +218,31 @@ model Message {
   body           String
   readAt         DateTime?
   createdAt      DateTime     @default(now())
-
+  storyMediaUrl  String?
+    storyMediaType  String?
   @@index([conversationId, createdAt])
+}
+model Story {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation("authorStories", fields: [authorId], references: [id], onDelete: Cascade)
+  mediaUrl  String
+  type      String   @default("IMAGE")
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  reactions StoryReaction[]
+  @@index([authorId])
+  @@index([expiresAt])
+}
+model StoryReaction {
+  id        String   @id @default(cuid())
+  storyId   String
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([storyId, userId])
+  @@index([storyId])
 }

@@ -26,7 +26,7 @@ export default async function RootLayout({ children }) {
           user={user ? { username: user.username, name: user.name, avatarUrl: user.avatarUrl } : null}
           unread={unread}
         />
-        <main className="mx-auto w-full max-w-shell px-4 py-6">{children}</main>
+        <main className="mx-auto w-full max-w-[1600px] px-4 py-6">{children}</main>
       </body>
     </html>
   );
