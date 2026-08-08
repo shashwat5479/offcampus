@@ -58,13 +58,15 @@ model College {
 }
 
 model Community {
-  id          String  @id @default(cuid())
-  collegeId   String
-  college     College @relation(fields: [collegeId], references: [id])
+  id          String   @id @default(cuid())
+  collegeId   String?
+  college     College? @relation(fields: [collegeId], references: [id])
   type        String
   name        String
-  slug        String  @unique
+  slug        String   @unique
   description String?
+  isPublic    Boolean  @default(false)
+  category    String?
 
   posts   Post[]
   members Membership[]

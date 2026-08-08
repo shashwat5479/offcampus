@@ -29,6 +29,10 @@ export default function Sidebar({ joinedCommunities = [], me }) {
         <Item href="/notifications" label="Notifications">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
         </Item>
+        <Link href="/communities" className="flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-subtle hover:bg-paper hover:text-ink">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M15.5 8a3 3 0 1 0 0-.1M3 20a6 6 0 0 1 12 0M14 20a6 6 0 0 1 7-5.2"/></svg>
+          Communities
+        </Link>
       </nav>
 
       <div className="mt-5 px-3 text-[11px] font-semibold uppercase tracking-wide text-faint">Your communities</div>
