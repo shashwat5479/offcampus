@@ -1,5 +1,5 @@
 "use client";
-
+import Collegepicker from "@/components/Collegepicker";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -42,9 +42,7 @@ export default function OnboardingForm({ pending, colleges = [] }) {
         <div className="mt-5 flex flex-col gap-3">
           <input className={field} placeholder="Full name" value={form.name} onChange={set("name")} />
           <input className={field} placeholder="Username" value={form.username} onChange={set("username")} />
-          <select className={field} value={form.collegeId} onChange={set("collegeId")}>
-            {colleges.map((c) => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}
-          </select>
+        <CollegePicker value={form.collegeId} onChange={(id) => setForm((f) => ({ ...f, collegeId: id }))} />
           <div className="flex gap-3">
             <input className={field} placeholder="Branch (e.g. CSE)" value={form.branch} onChange={set("branch")} />
             <input className={field} placeholder="Year" value={form.year} onChange={set("year")} />
