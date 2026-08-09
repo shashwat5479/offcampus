@@ -8,6 +8,7 @@ import SuggestPanel from "@/components/SuggestPanel";
 import FeedTabs from "@/components/FeedTabs";
 import PostCard from "@/components/PostCard";
 import StoriesBar from "@/components/StoriesBar";
+import FeedList from "@/components/FeedList";
 
 export const dynamic = "force-dynamic";
 
@@ -68,17 +69,15 @@ export default async function HomePage({ searchParams }) {
             groups={otherStories}
           />
         </div>
-
-        <div className="flex flex-col gap-3">
-          {posts.length === 0 ? (
-            <p className="rounded-xl2 border border-line bg-paper p-8 text-center text-sm text-subtle">
-              Nothing here yet. <a href="/submit" className="font-medium text-accent">Write the first post.</a>
-            </p>
-          ) : (
-            posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} />)
-          )}
-        </div>
-
+{posts.length === 0 ? (
+          <p className="rounded-xl2 border border-line bg-paper p-8 text-center text-sm text-subtle">
+            Nothing here yet. <a href="/submit" className="font-medium text-accent">Write the first post.</a>
+          </p>
+        ) : (
+          <FeedList>
+            {posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} />)}
+          </FeedList>
+        )}
         <div className="sticky bottom-0 z-10 mt-4 flex justify-center border-t border-line bg-canvas/90 py-2 backdrop-blur">
           <FeedTabs active={sort} basePath="/" />
         </div>

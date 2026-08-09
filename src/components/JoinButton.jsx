@@ -12,7 +12,7 @@ export default function JoinButton({ communityId, joined, size = "sm" }) {
     if (busy) return;
     setBusy(true);
     const prev = on;
-    setOn(!prev);
+    setOn(!prev); // optimistic flip
     try {
       const res = await fetch("/api/join", {
         method: "POST",
@@ -21,9 +21,9 @@ export default function JoinButton({ communityId, joined, size = "sm" }) {
       });
       if (res.status === 401) return router.push("/login");
       if (!res.ok) throw new Error();
-      router.refresh();
+      // no router.refresh() — the optimistic state is the source of truth
     } catch {
-      setOn(prev);
+      setOn(prev); // revert on failure
     } finally {
       setBusy(false);
     }

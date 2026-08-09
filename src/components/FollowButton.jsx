@@ -12,7 +12,7 @@ export default function FollowButton({ userId, following, size = "sm" }) {
     if (busy) return;
     setBusy(true);
     const prev = on;
-    setOn(!prev);
+    setOn(!prev); // optimistic flip
     try {
       const res = await fetch("/api/follow", {
         method: "POST",
@@ -21,7 +21,7 @@ export default function FollowButton({ userId, following, size = "sm" }) {
       });
       if (res.status === 401) return router.push("/login");
       if (!res.ok) throw new Error();
-      router.refresh();
+      // no router.refresh() — instant, no full-page re-render
     } catch {
       setOn(prev);
     } finally {

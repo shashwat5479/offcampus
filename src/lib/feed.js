@@ -7,6 +7,7 @@ export async function loadGraph() {
   const [posts, communities, users, memberships, follows] = await Promise.all([
     prisma.post.findMany({
       orderBy: { createdAt: "desc" },
+      take: 300,
       include: {
         author: true,
         community: { include: { college: true } },

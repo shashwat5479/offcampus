@@ -43,6 +43,11 @@ model User {
   notifyVote         Boolean        @default(true)
   isPrivate          Boolean        @default(false)
   notifyMessage      Boolean        @default(true)
+  confessions        Confession[]   @relation("confessions")
+   confessionVotes    ConfessionVote[]
+   accounts       Account[]
+    sessions      Session[]
+    
   createdAt DateTime @default(now())
 
   @@index([collegeId])
@@ -89,6 +94,7 @@ model Membership {
 
   @@unique([userId, communityId])
   @@index([communityId])
+  @@index([userId])
 }
 
 model Post {
@@ -111,8 +117,8 @@ model Post {
 
   createdAt DateTime @default(now())
 
-  @@index([communityId])
-  @@index([authorId])
+  @@index([communityId, createdAt])
+  @@index([authorId, createdAt])
 }
 
 model Comment {
@@ -131,7 +137,7 @@ model Comment {
 
   createdAt DateTime @default(now())
 
-  @@index([postId])
+  @@index([postId, createdAt])
   @@index([parentId])
 }
 
@@ -179,6 +185,7 @@ model Follow {
 
   @@unique([followerId, followingId])
   @@index([followingId])
+  @@index([followerId])
 }
 
 model Notification {
@@ -284,4 +291,66 @@ model OpportunityApplication {
 
   @@unique([opportunityId, userId])
   @@index([userId])
+}
+model Confession {
+  id         String   @id @default(cuid())
+  authorId   String   // stored for moderation, NEVER sent to the client
+  author     User     @relation("confessions", fields: [authorId], references: [id], onDelete: Cascade)
+  body       String
+  isPublic   Boolean  @default(false) // false = my college only, true = all colleges
+  collegeId  String?  // captured at post time for college-scoped visibility
+  score      Int      @default(0)
+  reportCount Int     @default(0)
+  hidden     Boolean  @default(false) // auto-hidden after enough reports
+  createdAt  DateTime @default(now())
+
+  votes ConfessionVote[]
+
+  @@index([isPublic, createdAt])
+  @@index([collegeId, createdAt])
+}
+
+model ConfessionVote {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  confessionId String
+  confession   Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  value        Int
+
+  @@unique([userId, confessionId])
+  @@index([confessionId])
+}
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
