@@ -1,5 +1,5 @@
 "use client";
-import Collegepicker from "@/components/Collegepicker";
+import CollegePicker from "@/components/Collegepicker";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
