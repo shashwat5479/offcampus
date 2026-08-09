@@ -22,7 +22,8 @@ model User {
   storyReactions StoryReaction[]
   collegeId String?
   college   College? @relation(fields: [collegeId], references: [id])
-
+  opportunitiesPosted  Opportunity[]  @relation("opportunitiesPosted")
+  myApplications       OpportunityApplication[]  @relation("myApplications")
   posts        Post[]
   comments     Comment[]
   postVotes    PostVote[]
@@ -247,4 +248,40 @@ model StoryReaction {
 
   @@unique([storyId, userId])
   @@index([storyId])
+}
+model Opportunity {
+  id          String   @id @default(cuid())
+  postedById  String
+  postedBy    User     @relation("opportunitiesPosted", fields: [postedById], references: [id], onDelete: Cascade)
+  company     String
+  role        String
+  type        String   @default("Placement") // Placement | Internship | Hackathon
+  description String?
+  location    String?
+  isRemote    Boolean  @default(false)
+  branches    String?  // comma-separated, e.g. "CSE,IT,ECE" (blank = all)
+  batchYear   Int?
+  stipend     String?  // free text: "12 LPA" / "25k/mo"
+  applyUrl    String
+  deadline    DateTime?
+  createdAt   DateTime @default(now())
+
+  applications OpportunityApplication[]
+
+  @@index([type])
+  @@index([deadline])
+}
+
+model OpportunityApplication {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation("myApplications", fields: [userId], references: [id], onDelete: Cascade)
+  status        String      @default("SAVED") // SAVED | APPLIED | INTERVIEWING | OFFER | REJECTED
+  updatedAt     DateTime    @updatedAt
+  createdAt     DateTime    @default(now())
+
+  @@unique([opportunityId, userId])
+  @@index([userId])
 }
