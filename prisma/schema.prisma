@@ -47,6 +47,7 @@ model User {
    confessionVotes    ConfessionVote[]
    accounts       Account[]
     sessions      Session[]
+  ConfessionReports  ConfessionReport[]
 
   createdAt DateTime @default(now())
 
@@ -303,7 +304,7 @@ model Confession {
   reportCount Int     @default(0)
   hidden     Boolean  @default(false) // auto-hidden after enough reports
   createdAt  DateTime @default(now())
-
+  reports    ConfessionReport[]
   votes ConfessionVote[]
 
   @@index([isPublic, createdAt])
@@ -353,4 +354,15 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+model ConfessionReport {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  confessionId String
+  confession   Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, confessionId])
+  @@index([confessionId])
 }
