@@ -47,7 +47,7 @@ model User {
    confessionVotes    ConfessionVote[]
    accounts       Account[]
     sessions      Session[]
-    
+
   createdAt DateTime @default(now())
 
   @@index([collegeId])
@@ -86,8 +86,8 @@ model Membership {
   id          String    @id @default(cuid())
   userId      String
   user        User      @relation(fields: [userId], references: [id])
-  communityId String
-  community   Community @relation(fields: [communityId], references: [id])
+  communityId String?
+  community   Community?  @relation(fields: [communityId], references: [id])
   role        String    @default("MEMBER")
 
   createdAt DateTime @default(now())

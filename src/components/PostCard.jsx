@@ -13,9 +13,13 @@ export default function PostCard({ post, dir = 0 }) {
 
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-subtle">
-          <Link href={`/c/${post.community.slug}`} className="font-semibold text-ink hover:underline">
-            {college?.code} · {post.community.name}
-          </Link>
+          {post.community ? (
+              <Link href={`/c/${post.community.slug}`} className="font-semibold text-ink hover:underline">
+                {college?.code ? `${college.code} · ` : ""}{post.community.name}
+              </Link>
+            ) : (
+              <span className="font-semibold text-ink">Personal</span>
+            )}
           <span className="text-faint">•</span>
           <Link href={`/u/${post.author.username}`} className="hover:underline">
             @{post.author.username}

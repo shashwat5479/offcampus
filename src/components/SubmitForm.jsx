@@ -6,7 +6,7 @@ import { useState, useRef } from "react";
 export default function SubmitForm({ communities = [] }) {
   const router = useRouter();
   const [form, setForm] = useState({
-    communityId: communities[0]?.id || "",
+    communityId: "",
     title: "",
     body: "",
     mediaUrl:"",
@@ -72,10 +72,11 @@ export default function SubmitForm({ communities = [] }) {
       <h1 className="text-lg font-semibold tracking-tight">Create a post</h1>
       <div className="mt-4 flex flex-col gap-3">
         <div>
-          <label className="mb-1 block text-xs font-medium text-subtle">Community</label>
+          <label className="mb-1 block text-xs font-medium text-subtle">Community <span className="text-faint">(optional)</span></label>
           <select className={field} value={form.communityId} onChange={set("communityId")}>
+            <option value="">No community · personal post</option>
             {communities.map((c) => (
-              <option key={c.id} value={c.id}>{c.college?.code} · {c.name}</option>
+              <option key={c.id} value={c.id}>{c.college?.code ? `${c.college.code} · ` : ""}{c.name}</option>
             ))}
           </select>
         </div>

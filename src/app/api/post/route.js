@@ -13,15 +13,17 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const communityId = body.communityId;
+  const communityId = body.communityId || null;
   const title = (body.title || "").trim();
   const text = (body.body || "").trim();
-  if (!communityId || !title) {
-    return NextResponse.json({ error: "Community and title are required." }, { status: 400 });
+  if (!title) {
+    return NextResponse.json({ error: "Give your post a title." }, { status: 400 });
   }
 
-  const community = await prisma.community.findUnique({ where: { id: communityId }, select: { id: true } });
-  if (!community) return NextResponse.json({ error: "Community not found." }, { status: 404 });
+  if (communityId) {
+    const community = await prisma.community.findUnique({ where: { id: communityId }, select: { id: true } });
+    if (!community) return NextResponse.json({ error: "Community not found." }, { status: 404 });
+  }
 
   const mediaUrl = (body.mediaUrl || "").trim();
   const isImage = /\.(png|jpe?g|gif|webp|avif|svg)(\?.*)?$/i.test(mediaUrl);
@@ -48,7 +50,7 @@ export async function POST(request) {
   const post = await prisma.post.create({
     data: {
       authorId: user.id,
-      communityId,
+      communityId: communityId || null,
       type,
             title,
             body: text || null,
