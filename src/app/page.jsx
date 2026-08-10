@@ -3,7 +3,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { loadGraph, loadViewer, buildContext } from "@/lib/feed";
 import { rankFeed, suggestCommunities, suggestPeople, trendingTags } from "@/lib/rank";
 import { getFeedStories } from "@/lib/story";
-import Sidebar from "@/components/Sidebar";
 import SuggestPanel from "@/components/SuggestPanel";
 import FeedTabs from "@/components/FeedTabs";
 import PostCard from "@/components/PostCard";
@@ -54,13 +53,9 @@ export default async function HomePage({ searchParams }) {
   });
 
   const trending = trendingTags(graph.plainPosts);
-  const joinedCommunities = graph.communities.filter((c) => viewer.joined.has(c.id));
 
   return (
     <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 md:flex-row">
-      <div className="w-56 shrink-0">
-        <Sidebar joinedCommunities={joinedCommunities} me={user.username} />
-      </div>
 
       <div className="mx-auto flex min-w-0 flex-1 flex-col md:max-w-2xl">
         <div className="mb-4">
@@ -78,7 +73,7 @@ export default async function HomePage({ searchParams }) {
             {posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} />)}
           </FeedList>
         )}
-        <div className="sticky bottom-0 z-10 mt-4 flex justify-center border-t border-line bg-canvas/90 py-2 backdrop-blur">
+        <div className="sticky bottom-24 z-10 mt-4 flex justify-center border-t border-line bg-canvas/90 py-2 backdrop-blur">
           <FeedTabs active={sort} basePath="/" />
         </div>
       </div>
