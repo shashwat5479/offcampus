@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
+import { uploadFile } from "@/lib/upload";
 
 export default function SubmitForm({ communities = [] }) {
   const router = useRouter();
@@ -9,7 +10,7 @@ export default function SubmitForm({ communities = [] }) {
     communityId: "",
     title: "",
     body: "",
-    mediaUrl:"",
+    mediaUrl: "",
     tags: "",
   });
   const [error, setError] = useState("");
@@ -24,14 +25,10 @@ export default function SubmitForm({ communities = [] }) {
     setUploading(true);
     setError("");
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) { setError(data.error || "Upload failed."); return; }
-      setForm((f) => ({ ...f, mediaUrl: data.url }));
-    } catch {
-      setError("Upload failed.");
+      const { url } = await uploadFile(file);
+      setForm((f) => ({ ...f, mediaUrl: url }));
+    } catch (err) {
+      setError(err.message || "Upload failed.");
     } finally {
       setUploading(false);
     }
@@ -65,39 +62,71 @@ export default function SubmitForm({ communities = [] }) {
     }
   }
 
-  const field = "w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm outline-none focus:border-ink";
+  const field = "w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm text-ink outline-none focus:border-accent";
 
   return (
     <div className="rounded-xl2 border border-line bg-paper p-5">
-      <h1 className="text-lg font-semibold tracking-tight">Create a post</h1>
+      <h1 className="text-lg font-semibold tracking-tight text-ink">Create a post</h1>
       <div className="mt-4 flex flex-col gap-3">
         <div>
-          <label className="mb-1 block text-xs font-medium text-subtle">Community <span className="text-faint">(optional)</span></label>
+          <label className="mb-1 block text-xs font-medium text-subtle">
+            Community <span className="text-faint">(optional)</span>
+          </label>
           <select className={field} value={form.communityId} onChange={set("communityId")}>
             <option value="">No community · personal post</option>
             {communities.map((c) => (
-              <option key={c.id} value={c.id}>{c.college?.code ? `${c.college.code} · ` : ""}{c.name}</option>
+              <option key={c.id} value={c.id}>
+                {c.college?.code ? `${c.college.code} · ` : ""}{c.name}
+              </option>
             ))}
           </select>
         </div>
-        <input className={field} placeholder="An interesting title" value={form.title} onChange={set("title")} />
-        <textarea className={`${field} resize-none`} rows={6} placeholder="Text, a link (https://…), code…" value={form.body} onChange={set("body")} />
+
         <div>
-          <button type="button" onClick={() => fileRef.current?.click()} className="rounded-lg border border-line px-3 py-2 text-sm font-medium text-subtle">
-            {uploading ? "Uploading…" : "Upload image / video"}
-          </button>
+          <label className="mb-1 block text-xs font-medium text-subtle">Title</label>
+          <input className={field} value={form.title} onChange={set("title")} placeholder="What's up?" />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-subtle">Body</label>
+          <textarea className={field} rows={4} value={form.body} onChange={set("body")} placeholder="Say more (optional)…" />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-subtle">Photo / video (optional)</label>
           <input ref={fileRef} type="file" accept="image/*,video/*" onChange={handleFile} className="hidden" />
-          {form.mediaUrl && !uploading && <span className="ml-2 text-xs text-subtle">Attached ✓</span>}
-        </div>
-        <input className={field} placeholder="Image or video URL (optional)" value={form.mediaUrl} onChange={set("mediaUrl")} />
-        <input className={field} placeholder="tags, comma, separated" value={form.tags} onChange={set("tags")} />
-        {error && <p className="text-sm text-up">{error}</p>}
-        <div className="flex justify-end gap-2">
-          <button onClick={() => router.back()} className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-subtle">Cancel</button>
-          <button onClick={submit} disabled={busy} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper disabled:opacity-50">
-            {busy ? "Publishing…" : "Publish"}
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="rounded-lg border border-line px-3 py-2 text-xs text-subtle hover:text-ink"
+          >
+            {uploading ? "Uploading…" : form.mediaUrl ? "Change media" : "Add photo / video"}
           </button>
+          {form.mediaUrl && (
+            <div className="mt-2 overflow-hidden rounded-lg border border-line">
+              {/\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(form.mediaUrl) ? (
+                <video src={form.mediaUrl} controls className="max-h-64 w-full object-contain" />
+              ) : (
+                <img src={form.mediaUrl} alt="" className="max-h-64 w-full object-contain" />
+              )}
+            </div>
+          )}
         </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-subtle">Tags <span className="text-faint">(comma-separated)</span></label>
+          <input className={field} value={form.tags} onChange={set("tags")} placeholder="events, hackathon" />
+        </div>
+
+        {error && <p className="text-sm text-up">{error}</p>}
+
+        <button
+          onClick={submit}
+          disabled={busy || uploading}
+          className="rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-accentInk disabled:opacity-50"
+        >
+          {busy ? "Publishing…" : "Publish"}
+        </button>
       </div>
     </div>
   );
