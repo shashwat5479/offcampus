@@ -56,7 +56,6 @@ export default async function HomePage({ searchParams }) {
 
   return (
     <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 md:flex-row">
-
       <div className="mx-auto flex min-w-0 flex-1 flex-col md:max-w-2xl">
         <div className="mb-4">
           <StoriesBar
@@ -64,7 +63,12 @@ export default async function HomePage({ searchParams }) {
             groups={otherStories}
           />
         </div>
-{posts.length === 0 ? (
+
+        <div className="mb-4 flex justify-center border-b border-line pb-2">
+          <FeedTabs active={sort} basePath="/" />
+        </div>
+
+        {posts.length === 0 ? (
           <p className="rounded-xl2 border border-line bg-paper p-8 text-center text-sm text-subtle">
             Nothing here yet. <a href="/submit" className="font-medium text-accent">Write the first post.</a>
           </p>
@@ -73,9 +77,6 @@ export default async function HomePage({ searchParams }) {
             {posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} />)}
           </FeedList>
         )}
-        <div className="sticky bottom-24 z-10 mt-4 flex justify-center border-t border-line bg-canvas/90 py-2 backdrop-blur">
-          <FeedTabs active={sort} basePath="/" />
-        </div>
       </div>
 
       <div className="w-72 shrink-0">
