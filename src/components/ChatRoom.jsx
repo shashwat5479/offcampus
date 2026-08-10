@@ -36,7 +36,8 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const [reactFor, setReactFor] = useState(null); // messageId with open reaction row
+  const [reactFor, setReactFor] = useState(null);
+  const [replyTo, setReplyTo] = useState(null); // { id, body, mine }
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -63,16 +64,18 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
     setSending(true);
     setText("");
     setShowPicker(false);
+    const currentReply = replyTo;
+    setReplyTo(null);
     try {
       const res = await fetch("/api/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toUserId: other.id, body }),
+        body: JSON.stringify({ toUserId: other.id, body, replyToId: currentReply?.id || null }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) { setText(body); return; }
+      if (!res.ok) { setText(body); setReplyTo(currentReply); return; }
       setMessages((prev) => (prev.some((m) => m.id === data.message.id) ? prev : [...prev, data.message]));
-    } catch { setText(body); } finally { setSending(false); }
+    } catch { setText(body); setReplyTo(currentReply); } finally { setSending(false); }
   }
 
   async function react(messageId, emoji) {
@@ -117,6 +120,13 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
                 {!mine && <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={26} />}
 
                 <div className={`relative flex max-w-[72%] flex-col ${mine ? "items-end" : "items-start"}`}>
+                  {/* quoted reply */}
+                  {m.replySnippet && (
+                    <div className={`mb-0.5 max-w-full truncate rounded-lg border-l-2 border-accent bg-canvas/60 px-2 py-1 text-[11px] text-subtle ${mine ? "self-end" : "self-start"}`}>
+                      <span className="text-faint">{m.replyFromMe ? "You" : other.name}: </span>{m.replySnippet}
+                    </div>
+                  )}
+
                   {m.storyMediaUrl ? (
                     <>
                       <span className="mb-0.5 text-[11px] text-faint">{mine ? "You replied to their story" : "Replied to your story"}</span>
@@ -142,19 +152,20 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
                     </div>
                   )}
 
-                  {/* react opener + row */}
+                  {/* react + reply opener */}
                   <div className={`absolute top-1/2 -translate-y-1/2 ${mine ? "right-full mr-1" : "left-full ml-1"}`}>
                     {reactFor === m.id ? (
                       <div className="flex items-center gap-0.5 rounded-full border border-line bg-paper px-1.5 py-1 shadow-gold">
                         {REACTIONS.map((e) => (
                           <button key={e} onClick={() => react(m.id, e)} className="text-base transition-transform hover:scale-125">{e}</button>
                         ))}
+                        <button onClick={() => { setReplyTo({ id: m.id, body: m.body, mine }); setReactFor(null); }} className="ml-1 border-l border-line pl-1.5 text-xs text-subtle hover:text-ink">↩</button>
                       </div>
                     ) : (
                       <button
                         onClick={() => setReactFor(m.id)}
-                        className="opacity-0 transition-opacity group-hover:opacity-100 text-sm text-faint hover:text-ink"
-                        aria-label="React"
+                        className="text-sm text-faint opacity-0 transition-opacity hover:text-ink group-hover:opacity-100"
+                        aria-label="React or reply"
                       >☺</button>
                     )}
                   </div>
@@ -165,6 +176,17 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
           <div ref={bottomRef} />
         </div>
       </div>
+
+      {/* replying-to bar */}
+      {replyTo && (
+        <div className="mb-2 flex items-center gap-2 rounded-lg border border-line bg-canvas px-3 py-2 text-xs">
+          <div className="min-w-0 flex-1">
+            <div className="text-faint">Replying to {replyTo.mine ? "yourself" : other.name}</div>
+            <div className="truncate text-subtle">{replyTo.body}</div>
+          </div>
+          <button onClick={() => setReplyTo(null)} className="text-subtle hover:text-ink">✕</button>
+        </div>
+      )}
 
       {/* emoji picker */}
       {showPicker && (

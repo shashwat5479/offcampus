@@ -22,7 +22,10 @@ export default async function ConversationPage({ params }) {
     where: { conversationId: convo.id },
     orderBy: { createdAt: "asc" },
     take: 100,
-    include: {reactions: { select: { userId: true, emoji: true } }},
+    include: {
+      reactions: { select: { emoji: true, userId: true } },
+      replyTo: { select: { body: true, senderId: true } },
+    },
   });
 
   return (
@@ -30,6 +33,7 @@ export default async function ConversationPage({ params }) {
       conversationId={convo.id}
       meId={user.id}
       other={{ id: other.id, name: other.name, username: other.username, avatarUrl: other.avatarUrl }}
-      initialMessages={messages.map((m) => ({ id: m.id, senderId: m.senderId, body: m.body, storyMediaUrl: m.storyMediaUrl, storyMediaType: m.storyMediaType, createdAt: m.createdAt, reactions: m.reactions }))}    />
-  );
+      initialMessages={messages.map((m) => ({ id: m.id, senderId: m.senderId, body: m.body, storyMediaUrl: m.storyMediaUrl, storyMediaType: m.storyMediaType, reactions: m.reactions, replyToId: m.replyToId, replySnippet: m.replyTo?.body?.slice(0, 80) || null, replyFromMe: m.replyTo ? m.replyTo.senderId === user.id : null, createdAt: m.createdAt }))}
+      />
+    );
 }

@@ -30,8 +30,26 @@ export async function POST(request) {
   }
 
   // save the message
+  // optional reply target — fetch a short snippet to show in the bubble
+  let replyToId = body.replyToId || null;
+  let replySnippet = null;
+  let replyFromMe = null;
+  if (replyToId) {
+    const parent = await prisma.message.findUnique({
+      where: { id: replyToId },
+      select: { id: true, body: true, senderId: true, conversationId: true },
+    });
+    // only allow replying to a message in the same conversation
+    if (parent && parent.conversationId === convo.id) {
+      replySnippet = (parent.body || "").slice(0, 80);
+      replyFromMe = parent.senderId === user.id;
+    } else {
+      replyToId = null;
+    }
+  }
+
   const message = await prisma.message.create({
-    data: { conversationId: convo.id, senderId: user.id, body: text },
+    data: { conversationId: convo.id, senderId: user.id, body: text, replyToId },
   });
   await prisma.conversation.update({ where: { id: convo.id }, data: { updatedAt: new Date() } });
 
@@ -42,6 +60,9 @@ export async function POST(request) {
       id: message.id,
       senderId: user.id,
       body: text,
+      replyToId,
+      replySnippet,
+      replyFromMe,
       createdAt: message.createdAt,
     });
   } catch {

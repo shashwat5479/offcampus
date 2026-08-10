@@ -233,6 +233,9 @@ model Message {
   storyMediaUrl  String?
     storyMediaType  String?
     reactions    MessageReaction[]
+    replyToId    String?
+    replyTo       Message? @relation("replies", fields: [replyToId], references: [id])
+    repliesTo     Message[] @relation("replies")
   
 
   @@index([conversationId, createdAt])
