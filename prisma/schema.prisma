@@ -49,6 +49,7 @@ model User {
     sessions      Session[]
   ConfessionReports  ConfessionReport[]
   confessionComments   ConfessionComment[]   @relation("confessionComments")
+    messageReactions  MessageReaction[]
   createdAt DateTime @default(now())
 
   @@index([collegeId])
@@ -231,6 +232,9 @@ model Message {
   createdAt      DateTime     @default(now())
   storyMediaUrl  String?
     storyMediaType  String?
+    reactions    MessageReaction[]
+  
+
   @@index([conversationId, createdAt])
 }
 model Story {
@@ -376,4 +380,16 @@ model ConfessionComment {
   createdAt    DateTime   @default(now())
 
   @@index([confessionId, createdAt])
+}
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId])
+  @@index([messageId])
 }
