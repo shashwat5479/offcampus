@@ -33,10 +33,6 @@ export default function AddStoryPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mediaUrl: url, type: kind }),
       });
-      let u = {};
-      try { u = JSON.parse(upText); } catch {}
-      if (!up.ok) throw new Error(u.error || `Upload failed (${up.status})`);
-      if (!u.url) throw new Error("Upload returned no URL");
       if (!res.ok) throw new Error("Could not post story");
       router.push("/");
       router.refresh();
