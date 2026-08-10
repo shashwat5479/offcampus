@@ -103,8 +103,8 @@ model Post {
   id          String    @id @default(cuid())
   authorId    String
   author      User      @relation(fields: [authorId], references: [id])
-  communityId String
-  community   Community @relation(fields: [communityId], references: [id])
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id])
 
   type    String  @default("TEXT")
   title   String
