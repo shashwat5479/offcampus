@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { uploadFile } from "@/lib/upload";
 
 export default function AddStoryPage() {
   const router = useRouter();
@@ -26,19 +27,16 @@ export default function AddStoryPage() {
     setBusy(true);
     setErr("");
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const up = await fetch("/api/upload", { method: "POST", body: fd });
-      const upText = await up.text();
+      const { url, kind } = await uploadFile(file);
+      const res = await fetch("/api/story", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediaUrl: url, type: kind }),
+      });
       let u = {};
       try { u = JSON.parse(upText); } catch {}
       if (!up.ok) throw new Error(u.error || `Upload failed (${up.status})`);
       if (!u.url) throw new Error("Upload returned no URL");
-      const res = await fetch("/api/story", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mediaUrl: u.url, type: u.kind }),
-      });
       if (!res.ok) throw new Error("Could not post story");
       router.push("/");
       router.refresh();
