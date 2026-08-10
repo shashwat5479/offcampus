@@ -48,7 +48,7 @@ model User {
    accounts       Account[]
     sessions      Session[]
   ConfessionReports  ConfessionReport[]
-
+  confessionComments   ConfessionComment[]   @relation("confessionComments")
   createdAt DateTime @default(now())
 
   @@index([collegeId])
@@ -306,7 +306,7 @@ model Confession {
   createdAt  DateTime @default(now())
   reports    ConfessionReport[]
   votes ConfessionVote[]
-
+  comments  ConfessionComment[]
   @@index([isPublic, createdAt])
   @@index([collegeId, createdAt])
 }
@@ -365,4 +365,15 @@ model ConfessionReport {
 
   @@unique([userId, confessionId])
   @@index([confessionId])
+}
+model ConfessionComment {
+  id           String     @id @default(cuid())
+  confessionId String
+  confession   Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  authorId     String     // stored for moderation, NEVER sent to the client
+  author       User       @relation("confessionComments", fields: [authorId], references: [id], onDelete: Cascade)
+  body         String
+  createdAt    DateTime   @default(now())
+
+  @@index([confessionId, createdAt])
 }

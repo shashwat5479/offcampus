@@ -71,6 +71,11 @@ export function ConfessionItem({ c }) {
   const [dir, setDir] = useState(c.dir);
   const [reported, setReported] = useState(false);
 
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState(null); // null = not loaded yet
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+
   async function up() {
     const prevS = score;
     const prevD = dir;
@@ -105,6 +110,41 @@ export function ConfessionItem({ c }) {
     }
   }
 
+  async function toggleComments() {
+    const next = !showComments;
+    setShowComments(next);
+    if (next && comments === null) {
+      try {
+        const res = await fetch(`/api/confession/comment?confessionId=${c.id}`);
+        const d = await res.json();
+        setComments(res.ok ? d.comments : []);
+      } catch {
+        setComments([]);
+      }
+    }
+  }
+
+  async function sendComment() {
+    const body = text.trim();
+    if (!body || sending) return;
+    setSending(true);
+    try {
+      const res = await fetch("/api/confession/comment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confessionId: c.id, body }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        setComments(d.comments);
+        setText("");
+      } else {
+        alert(d.error || "Couldn't post");
+      }
+    } catch {}
+    setSending(false);
+  }
+
   return (
     <div className="rounded-xl2 border border-line bg-paper p-4">
       <div className="mb-1 flex items-center gap-2 text-[11px] text-faint">
@@ -130,6 +170,10 @@ export function ConfessionItem({ c }) {
           {score}
         </button>
 
+        <button onClick={toggleComments} className="ml-3 text-xs text-subtle hover:text-ink">
+          {showComments ? "Hide" : "Comment"}
+        </button>
+
         <button
           onClick={report}
           disabled={reported}
@@ -138,6 +182,42 @@ export function ConfessionItem({ c }) {
           {reported ? "Reported" : "Report"}
         </button>
       </div>
+
+      {showComments && (
+        <div className="mt-3 border-t border-line pt-3">
+          <div className="flex flex-col gap-2">
+            {comments === null ? (
+              <p className="text-xs text-faint">Loading…</p>
+            ) : comments.length === 0 ? (
+              <p className="text-xs text-faint">No comments yet.</p>
+            ) : (
+              comments.map((cm) => (
+                <div key={cm.id} className="rounded-lg bg-canvas px-3 py-2">
+                  <div className="text-[11px] text-faint">Anonymous · {timeAgo(cm.createdAt)}</div>
+                  <p className="whitespace-pre-wrap text-sm text-ink">{cm.body}</p>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendComment()}
+              placeholder="Add an anonymous comment…"
+              maxLength={500}
+              className="flex-1 rounded-full border border-line bg-canvas px-3 py-1.5 text-xs text-ink outline-none focus:border-accent"
+            />
+            <button
+              onClick={sendComment}
+              disabled={sending || !text.trim()}
+              className="rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accentInk disabled:opacity-50"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
