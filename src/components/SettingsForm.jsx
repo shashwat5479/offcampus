@@ -37,15 +37,17 @@ export default function SettingsForm({ initial }) {
   async function pickAvatar(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true); setErr("");
+    setUploading(true);
+    setError("");
     try {
       const { url } = await uploadFile(file);
-
-      if (!res.ok) { setErr(data.error || "Upload failed."); return; }
-      setForm((f) => ({ ...f, avatarUrl: data.url }));
-    } catch { setErr("Upload failed."); } finally { setUploading(false); }
+      setForm((f) => ({ ...f, avatarUrl: url }));   // or however your form stores it
+    } catch (err) {
+      setError(err.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
   }
-
   async function saveProfile() {
     setErr(""); setMsg("");
     const res = await fetch("/api/profile", {
