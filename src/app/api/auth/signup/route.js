@@ -43,7 +43,7 @@ export async function POST(request) {
         passwordHash: hashPassword(password),
         branch: body.branch ? String(body.branch).trim() : null,
         year: Number.isFinite(year) ? year : null,
-        collegeId: body.collegeId || null,
+        collegeId: body.collegeId,
       },
     });
   } catch (e) {
@@ -51,6 +51,7 @@ export async function POST(request) {
       const field = Array.isArray(e.meta?.target) && e.meta.target.includes("email") ? "email" : "username";
       return NextResponse.json({ error: `That ${field} is already taken.` }, { status: 409 });
     }
+    if(!body.collegeId) return NextResponse.json({ error: "Select your college." }, { status: 400 });
     return NextResponse.json({ error: "Could not create account." }, { status: 500 });
   }
 

@@ -12,7 +12,7 @@ export default function AuthForm({ mode, colleges = [] }) {
     password: "",
     name: "",
     username: "",
-    collegeId: colleges[0]?.id || "",
+    collegeId: "",
     branch: "",
     year: "",
   });
@@ -23,6 +23,7 @@ export default function AuthForm({ mode, colleges = [] }) {
 
   async function submit() {
     setError("");
+    if(isSignup && !form.collegeId) {setError("Select your college."); return;}
     setBusy(true);
     try {
       const res = await fetch(`/api/auth/${mode}`, {
@@ -68,6 +69,7 @@ export default function AuthForm({ mode, colleges = [] }) {
               <input className={field} placeholder="Full name" value={form.name} onChange={set("name")} />
               <input className={field} placeholder="Username" value={form.username} onChange={set("username")} />
               <select className={field} value={form.collegeId} onChange={set("collegeId")}>
+                <option value="">Select your college</option>
                 {colleges.map((c) => (
                   <option key={c.id} value={c.id}>{c.code} — {c.name}</option>
                 ))}

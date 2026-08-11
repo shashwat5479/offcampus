@@ -16,6 +16,7 @@ export async function POST(request) {
   const name = (body.name || "").trim();
   if (!username || username.length < 3) return NextResponse.json({ error: "Pick a username (3+ letters/numbers)." }, { status: 400 });
   if (!name) return NextResponse.json({ error: "Name is required." }, { status: 400 });
+  if (!body.collegeId) return NextResponse.json({ error: "Select your college." }, { status: 400 });
 
   // guard duplicates
   const taken = await prisma.user.findUnique({ where: { username } });
@@ -30,7 +31,7 @@ export async function POST(request) {
       name,
       passwordHash: "",
       avatarUrl: pending.avatarUrl || null,
-      collegeId: body.collegeId || null,
+      collegeId: body.collegeId,
       branch: (body.branch || "").trim() || null,
       year: body.year ? parseInt(body.year, 10) || null : null,
     },

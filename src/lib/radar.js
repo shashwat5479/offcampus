@@ -2,6 +2,7 @@
 // Campus Radar aggregator — each college sees ITS OWN radar.
 // Scopes: mine (your college) · nearby (same-city colleges) · online (public/global only).
 // A college can never see another college's internal posts.
+// Cold-start: if "mine" is empty, quietly fall back to nearby → online so it's never dead.
 import { prisma } from "@/lib/db";
 
 function startOfToday() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
@@ -24,16 +25,14 @@ function closesIn(deadline) {
 
 const SCOPES = ["mine", "nearby", "online"];
 
-export async function loadRadar({ user, when = "week", scope = "mine" }) {
-  if (!SCOPES.includes(scope)) scope = "mine";
+async function aggregate({ user, when, scope }) {
   const now = new Date();
   const since = when === "today" ? startOfToday() : when === "week" ? daysAgo(7) : null;
   const deadlineMax = when === "today" ? endOfToday() : when === "week" ? daysAhead(7) : daysAhead(60);
 
   const myCollegeId = user?.collegeId || null;
 
-  // Resolve which colleges this scope may read from. Never "all".
-  let scopeCollegeIds = []; // for mine/nearby
+  let scopeCollegeIds = [];
   if (scope === "mine") {
     scopeCollegeIds = myCollegeId ? [myCollegeId] : [];
   } else if (scope === "nearby") {
@@ -49,38 +48,28 @@ export async function loadRadar({ user, when = "week", scope = "mine" }) {
     }
   }
   const online = scope === "online";
-
-  // Content lens: public/global content for "online", else strictly the scoped colleges.
   const communityScope = online ? { isPublic: true } : { collegeId: { in: scopeCollegeIds } };
 
-  // ---- 1. Opportunities closing soon (gated by poster's college; online = remote) ----
+  // 1. Opportunities closing soon
   const oppWhere = { deadline: { gte: now, lte: deadlineMax } };
   if (online) oppWhere.isRemote = true;
   else oppWhere.postedBy = { collegeId: { in: scopeCollegeIds } };
   const opps = await prisma.opportunity.findMany({
-    where: oppWhere,
-    orderBy: { deadline: "asc" },
-    take: 12,
+    where: oppWhere, orderBy: { deadline: "asc" }, take: 12,
     select: { id: true, company: true, role: true, type: true, deadline: true, isRemote: true, location: true },
   });
   const oppItems = opps.map((o) => ({
-    id: `opp-${o.id}`,
-    category: "opportunity",
-    subtype: o.type,
+    id: `opp-${o.id}`, category: "opportunity", subtype: o.type,
     title: `${o.role} · ${o.company}`,
     subtitle: `${o.type}${o.isRemote ? " · Remote" : o.location ? " · " + o.location : ""}`,
-    meta: closesIn(o.deadline),
-    href: "/opportunities",
-    at: o.deadline,
+    meta: closesIn(o.deadline), href: "/opportunities", at: o.deadline,
   }));
 
-  // ---- 2. Trending discussions ----
+  // 2. Trending discussions
   const postWhere = { community: communityScope };
   if (since) postWhere.createdAt = { gte: since };
   const posts = await prisma.post.findMany({
-    where: postWhere,
-    orderBy: [{ score: "desc" }, { createdAt: "desc" }],
-    take: 8,
+    where: postWhere, orderBy: [{ score: "desc" }, { createdAt: "desc" }], take: 8,
     select: {
       id: true, title: true, score: true, createdAt: true,
       community: { select: { name: true, college: { select: { code: true } } } },
@@ -88,57 +77,39 @@ export async function loadRadar({ user, when = "week", scope = "mine" }) {
     },
   });
   const postItems = posts.map((p) => ({
-    id: `post-${p.id}`,
-    category: "discussion",
-    title: p.title,
+    id: `post-${p.id}`, category: "discussion", title: p.title,
     subtitle: p.community?.name || "Discussion",
     meta: `${p.score} upvotes · ${p._count.comments} comments`,
-    href: `/post/${p.id}`,
-    at: p.createdAt,
-    collegeCode: p.community?.college?.code || null,
+    href: `/post/${p.id}`, at: p.createdAt, collegeCode: p.community?.college?.code || null,
   }));
 
-  // ---- 3. Communities to check out ----
+  // 3. Communities to check out
   const comms = await prisma.community.findMany({
-    where: communityScope,
-    orderBy: { createdAt: "desc" },
-    take: 5,
+    where: communityScope, orderBy: { createdAt: "desc" }, take: 5,
     select: {
       id: true, name: true, slug: true, category: true, type: true,
-      college: { select: { code: true } },
-      _count: { select: { members: true } },
+      college: { select: { code: true } }, _count: { select: { members: true } },
     },
   });
   const commItems = comms.map((c) => ({
-    id: `comm-${c.id}`,
-    category: "community",
-    title: c.name,
+    id: `comm-${c.id}`, category: "community", title: c.name,
     subtitle: c.category || c.type || "Community",
     meta: `${c._count.members} member${c._count.members === 1 ? "" : "s"}`,
-    href: `/c/${c.slug}`,
-    at: null,
-    collegeCode: c.college?.code || null,
+    href: `/c/${c.slug}`, at: null, collegeCode: c.college?.code || null,
   }));
 
-  // ---- 4. Latest confessions ----
+  // 4. Latest confessions
   const confWhere = { hidden: false };
   if (since) confWhere.createdAt = { gte: since };
   if (online) confWhere.isPublic = true;
   else confWhere.collegeId = { in: scopeCollegeIds };
   const confs = await prisma.confession.findMany({
-    where: confWhere,
-    orderBy: { createdAt: "desc" },
-    take: 6,
+    where: confWhere, orderBy: { createdAt: "desc" }, take: 6,
     select: { id: true, body: true, score: true, createdAt: true },
   });
   const confItems = confs.map((c) => ({
-    id: `conf-${c.id}`,
-    category: "confession",
-    title: trunc(c.body),
-    subtitle: "Anonymous",
-    meta: `${c.score} upvotes`,
-    href: "/confessions",
-    at: c.createdAt,
+    id: `conf-${c.id}`, category: "confession", title: trunc(c.body),
+    subtitle: "Anonymous", meta: `${c.score} upvotes`, href: "/confessions", at: c.createdAt,
   }));
 
   const sections = [
@@ -149,5 +120,22 @@ export async function loadRadar({ user, when = "week", scope = "mine" }) {
   ].filter((s) => s.items.length > 0);
 
   const total = sections.reduce((n, s) => n + s.items.length, 0);
-  return { sections, total, when, scope, hasCollege: !!myCollegeId };
+  return { sections, total, scope, hasCollege: !!myCollegeId };
+}
+
+export async function loadRadar({ user, when = "week", scope = "mine" }) {
+  if (!SCOPES.includes(scope)) scope = "mine";
+
+  const result = await aggregate({ user, when, scope });
+
+  // Cold-start fallback: a quiet college should never show a dead screen.
+  if (result.total === 0 && scope === "mine") {
+    for (const fb of ["nearby", "online"]) {
+      const alt = await aggregate({ user, when, scope: fb });
+      if (alt.total > 0) {
+        return { ...alt, when, requestedScope: scope, fellBackTo: fb };
+      }
+    }
+  }
+  return { ...result, when, requestedScope: scope, fellBackTo: null };
 }

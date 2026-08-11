@@ -8,7 +8,7 @@ export default function OnboardingForm({ pending, colleges = [] }) {
   const [form, setForm] = useState({
     username: "",
     name: pending.name || "",
-    collegeId: colleges[0]?.id || "",
+    collegeId: "", // no pre-select — the student must pick their real college
     branch: "",
     year: "",
   });
@@ -18,6 +18,7 @@ export default function OnboardingForm({ pending, colleges = [] }) {
 
   async function finish() {
     if (!form.username.trim() || !form.name.trim() || busy) return;
+    if (!form.collegeId) { setErr("Please select your college."); return; }
     setBusy(true); setErr("");
     try {
       const res = await fetch("/api/auth/complete-google", {
@@ -42,13 +43,13 @@ export default function OnboardingForm({ pending, colleges = [] }) {
         <div className="mt-5 flex flex-col gap-3">
           <input className={field} placeholder="Full name" value={form.name} onChange={set("name")} />
           <input className={field} placeholder="Username" value={form.username} onChange={set("username")} />
-        <CollegePicker value={form.collegeId} onChange={(id) => setForm((f) => ({ ...f, collegeId: id }))} />
+          <CollegePicker value={form.collegeId} onChange={(id) => setForm((f) => ({ ...f, collegeId: id }))} />
           <div className="flex gap-3">
             <input className={field} placeholder="Branch (e.g. CSE)" value={form.branch} onChange={set("branch")} />
             <input className={field} placeholder="Year" value={form.year} onChange={set("year")} />
           </div>
           {err && <p className="text-sm text-up">{err}</p>}
-          <button onClick={finish} disabled={busy} className="mt-1 rounded-full bg-accent py-3 text-sm font-semibold text-accentInk disabled:opacity-50">
+          <button onClick={finish} disabled={busy} className="mt-1 rounded-full bg-accent py-3 text-sm font-semibold text-white disabled:opacity-50">
             {busy ? "Creating…" : "Create account"}
           </button>
         </div>
