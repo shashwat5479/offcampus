@@ -57,84 +57,91 @@ export default function TopBar({ user, unread }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-shell items-center gap-2 px-3">
-        {/* Hamburger → left drawer */}
-        <button
-          onClick={() => setMenuOpen(true)}
-          aria-label="Menu"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        </button>
-
-        {/* Search pill — logo inside, reddish-orange lining */}
-        <div ref={boxRef} className="relative flex-1">
-          <div
-            onClick={() => inputRef.current?.focus()}
-            className={`flex h-10 cursor-text items-center gap-2.5 rounded-full border bg-canvas px-3 transition-all duration-200 ${
-              open
-                ? "border-up ring-2 ring-up/40 shadow-[0_0_0_4px_rgb(var(--c-up)/0.18)]"
-                : "border-up/60 shadow-[0_0_0_2px_rgb(var(--c-up)/0.10)] hover:border-up"
-            }`}
+    <>
+      <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-shell items-center gap-2 px-3">
+          {/* Hamburger → left drawer */}
+          <button
+            onClick={() => setMenuOpen(true)}
+            aria-label="Menu"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink"
           >
-            <img src="/logo.png" alt="OffCampus" className="h-6 w-6 shrink-0 rounded-md object-contain" />
-            <input
-              ref={inputRef}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onFocus={openPanel}
-              onKeyDown={(e) => e.key === "Enter" && search()}
-              placeholder="Search OffCampus"
-              className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-subtle"
-            />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+
+          {/* Wordmark — corner brand, Reddit-style */}
+          <Link href="/" className="mr-1 hidden shrink-0 items-center sm:flex">
+            <span className="font-display text-[19px] font-bold tracking-tight text-ink">OffCampus</span>
+          </Link>
+
+          {/* Search pill — logo inside, reddish-orange lining */}
+          <div ref={boxRef} className="relative flex-1">
+            <div
+              onClick={() => inputRef.current?.focus()}
+              className={`flex h-10 cursor-text items-center gap-2.5 rounded-full border bg-canvas px-3 transition-all duration-200 ${
+                open
+                  ? "border-up ring-2 ring-up/40 shadow-[0_0_0_4px_rgb(var(--c-up)/0.18)]"
+                  : "border-up/60 shadow-[0_0_0_2px_rgb(var(--c-up)/0.10)] hover:border-up"
+              }`}
+            >
+              <img src="/logo.png" alt="OffCampus" className="h-6 w-6 shrink-0 rounded-md object-contain" />
+              <input
+                ref={inputRef}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onFocus={openPanel}
+                onKeyDown={(e) => e.key === "Enter" && search()}
+                placeholder="Search OffCampus"
+                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-subtle"
+              />
+            </div>
+
+            {open && (
+              <div className="absolute left-0 right-0 top-12 z-40 rounded-2xl border border-line bg-paper p-3 shadow-2xl">
+                {q.trim() && (
+                  <button onClick={() => search()} className="mb-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ink transition-colors hover:bg-canvas">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-faint"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" /><path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+                    Search for &ldquo;{q.trim()}&rdquo;
+                  </button>
+                )}
+                <div className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">Explore trending</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {trending.length === 0 ? (
+                    <span className="px-2 py-1 text-xs text-faint">{loaded ? "Nothing trending yet." : "Loading…"}</span>
+                  ) : (
+                    trending.map(({ tag }) => (
+                      <button key={tag} onClick={() => search(tag)} className="rounded-full bg-canvas px-3 py-1.5 text-sm font-medium text-subtle transition-colors hover:text-up">
+                        #{tag}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
-          {open && (
-            <div className="absolute left-0 right-0 top-12 z-40 rounded-2xl border border-line bg-paper p-3 shadow-2xl">
-              {q.trim() && (
-                <button onClick={() => search()} className="mb-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ink transition-colors hover:bg-canvas">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-faint"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" /><path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-                  Search for &ldquo;{q.trim()}&rdquo;
-                </button>
-              )}
-              <div className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">Explore trending</div>
-              <div className="flex flex-wrap gap-1.5">
-                {trending.length === 0 ? (
-                  <span className="px-2 py-1 text-xs text-faint">{loaded ? "Nothing trending yet." : "Loading…"}</span>
-                ) : (
-                  trending.map(({ tag }) => (
-                    <button key={tag} onClick={() => search(tag)} className="rounded-full bg-canvas px-3 py-1.5 text-sm font-medium text-subtle transition-colors hover:text-up">
-                      #{tag}
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
+          {/* Messages + Notifications (heart) */}
+          {user ? (
+            <>
+              <Link href="/messages" aria-label="Messages" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </Link>
+              <Link href="/notifications" aria-label="Notifications" className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+                {unread > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-up"></span>}
+              </Link>
+            </>
+          ) : (
+            <Link href="/login" className="shrink-0 rounded-full bg-ink px-4 py-1.5 text-sm font-medium text-paper">Log in</Link>
           )}
         </div>
+      </header>
 
-        {/* Messages + Notifications (heart) */}
-        {user ? (
-          <>
-            <Link href="/messages" aria-label="Messages" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-            </Link>
-            <Link href="/notifications" aria-label="Notifications" className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-              {unread > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-up"></span>}
-            </Link>
-          </>
-        ) : (
-          <Link href="/login" className="shrink-0 rounded-full bg-ink px-4 py-1.5 text-sm font-medium text-paper">Log in</Link>
-        )}
-      </div>
-
-      {/* Left drawer (the old "More") */}
+      {/* Left drawer — OUTSIDE the header so fixed positioning covers the viewport */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
+        <div className="fixed inset-0 z-[60] animate-fade-in bg-black/50 backdrop-blur-sm" onClick={() => setMenuOpen(false)}>
           <div
-            className="absolute left-0 top-0 flex h-full w-[min(84vw,320px)] flex-col overflow-y-auto border-r border-line bg-paper p-4 shadow-2xl"
+            className="animate-slide-left absolute left-0 top-0 flex h-full w-[min(84vw,320px)] flex-col overflow-y-auto border-r border-line bg-paper p-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
@@ -181,6 +188,6 @@ export default function TopBar({ user, unread }) {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }
