@@ -152,7 +152,10 @@ export default function TopBar({ user, unread }) {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
               </button>
             </div>
-
+            <Link href="/communities" onClick={() => setMenuOpen(false)} className="mb-2 flex items-center gap-3 rounded-2xl border border-line bg-canvas p-3.5 text-ink transition-colors hover:bg-paper">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M15.5 8a3 3 0 1 0 0-.1M3 20a6 6 0 0 1 12 0M14 20a6 6 0 0 1 7-5.2"/></svg>
+  <span className="text-sm font-semibold">Communities</span>
+</Link>
             <div className="grid grid-cols-2 gap-2">
               <Link href="/confessions" onClick={() => setMenuOpen(false)} className="flex flex-col items-center gap-1.5 rounded-2xl border border-line bg-canvas p-4 text-ink transition-colors hover:bg-paper">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8M8 13h5"/></svg>

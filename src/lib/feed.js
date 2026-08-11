@@ -1,11 +1,29 @@
 import { prisma } from "./db";
 import { tagAffinity } from "./rank";
 
-// Loads the whole social graph once (fine at seed scale; the production schema
-// is indexed for the paginated version of these same queries).
-export async function loadGraph() {
+// Loads the social graph. Pass the viewer so personal-post privacy can be enforced.
+//
+// Visibility rules for the global feed:
+//   - Community posts: shown as before (their reach is the community's scope).
+//   - Personal posts (communityId = null): shown only if
+//       * the author's account is PUBLIC (isPrivate = false)  → global, or
+//       * the viewer follows the author (private account → followers only), or
+//       * the viewer IS the author (always sees their own posts).
+export async function loadGraph(viewer = null) {
+  const viewerId = viewer?.id || null;
+  const followingIds = viewer?.following ? Array.from(viewer.following) : [];
+
+  const orRules = [
+    { communityId: { not: null } },                         // all community posts
+    { communityId: null, author: { isPrivate: false } },    // public accounts' personal posts
+  ];
+  if (viewerId) orRules.push({ communityId: null, authorId: viewerId });               // own posts
+  if (followingIds.length) orRules.push({ communityId: null, authorId: { in: followingIds } }); // followed private accounts
+  const postWhere = { OR: orRules };
+
   const [posts, communities, users, memberships, follows] = await Promise.all([
     prisma.post.findMany({
+      where: postWhere,
       orderBy: { createdAt: "desc" },
       take: 300,
       include: {
