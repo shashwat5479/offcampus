@@ -15,14 +15,14 @@ module.exports = {
         up: "rgb(var(--c-up) / <alpha-value>)",
       },
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
-      maxWidth: {
-        feed: "42rem",
-        shell: "72rem",
-      },
-      borderRadius: {
-        xl2: "1rem",
+      maxWidth: { feed: "42rem", shell: "72rem" },
+      borderRadius: { xl2: "1rem" },
+      boxShadow: {
+        glow: "0 0 0 1px rgb(var(--c-accent) / 0.35), 0 10px 34px -10px rgb(var(--c-accent) / 0.55)",
+        soft: "0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.35)",
       },
     },
   },

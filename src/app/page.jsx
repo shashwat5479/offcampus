@@ -1,87 +1,39 @@
-import { redirect } from "next/navigation";
+import "./globals.css";
+import { Inter, Bricolage_Grotesque } from "next/font/google";
 import { getCurrentUser } from "@/lib/auth";
-import { loadGraph, loadViewer, buildContext } from "@/lib/feed";
-import { rankFeed, suggestCommunities, suggestPeople, trendingTags } from "@/lib/rank";
-import { getFeedStories } from "@/lib/story";
-import SuggestPanel from "@/components/SuggestPanel";
-import FeedTabs from "@/components/FeedTabs";
-import PostCard from "@/components/PostCard";
-import StoriesBar from "@/components/StoriesBar";
-import FeedList from "@/components/FeedList";
+import { prisma } from "@/lib/db";
+import TopBar from "@/components/TopBar";
+import BottomNav from "@/components/BottomNav";
 
-export const dynamic = "force-dynamic";
+const sans = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display", display: "swap" });
 
-const SORTS = ["foryou", "hot", "new", "top"];
+export const metadata = {
+  title: "OffCampus",
+  description: "The network for Indian college campuses.",
+};
 
-export default async function HomePage({ searchParams }) {
+export default async function RootLayout({ children }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
-  const sort = SORTS.includes(searchParams?.sort) ? searchParams.sort : "foryou";
-
-  const graph = await loadGraph();
-  const viewer = await loadViewer(user.id);
-  const ctx = buildContext(user, graph, viewer);
-
-  const storyGroups = await getFeedStories(user.id);
-  const myGroup = storyGroups.find((g) => g.user.id === user.id);
-  const otherStories = storyGroups.filter((g) => g.user.id !== user.id);
-
-  const ranked = rankFeed(graph.plainPosts, sort, ctx);
-  const posts = ranked.map((p) => graph.postById[p.id]);
-
-  const suggestedCommunities = suggestCommunities({
-    communities: graph.communities,
-    membersByCommunity: graph.membersByCommunity,
-    posts: graph.plainPosts,
-    joined: viewer.joined,
-    meId: user.id,
-    collegeId: user.collegeId,
-    limit: 5,
-  });
-
-  const suggestedPeople = suggestPeople({
-    users: graph.users,
-    communities: graph.communities,
-    membersByCommunity: graph.membersByCommunity,
-    followsBy: graph.followsBy,
-    following: viewer.following,
-    meId: user.id,
-    branch: user.branch,
-    collegeId: user.collegeId,
-    limit: 5,
-  });
-
-  const trending = trendingTags(graph.plainPosts);
-
+  const unread = user
+    ? await prisma.notification.count({ where: { userId: user.id, read: false } })
+    : 0;
   return (
-    <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 md:flex-row">
-      <div className="mx-auto flex min-w-0 flex-1 flex-col md:max-w-2xl">
-        <div className="mb-4">
-          <StoriesBar
-            me={{ name: user.name, username: user.username, avatarUrl: user.avatarUrl, hasStory: !!myGroup }}
-            groups={otherStories}
-          />
-        </div>
-
-        <div className="mb-4 flex justify-center border-b border-line pb-2">
-          <FeedTabs active={sort} basePath="/" />
-        </div>
-
-        {posts.length === 0 ? (
-          <p className="rounded-xl2 border border-line bg-paper p-8 text-center text-sm text-subtle">
-            Nothing here yet. <a href="/submit" className="font-medium text-accent">Write the first post.</a>
-          </p>
-        ) : (
-          <FeedList>
-            {posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} />)}
-          </FeedList>
-        )}
-      </div>
-
-      <div className="w-72 shrink-0">
-        <SuggestPanel communities={suggestedCommunities} people={suggestedPeople} trending={trending} />
-      </div>
-    </div>
+    <html lang="en" className={`${sans.variable} ${display.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-canvas text-ink font-sans">
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('theme');if(t!=='light'){document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}",
+          }}
+        />
+        <TopBar
+          user={user ? { username: user.username, name: user.name, avatarUrl: user.avatarUrl } : null}
+          unread={unread}
+        />
+        <main className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-28">{children}</main>
+        <BottomNav me={user ? user.username : null} unread={unread} />
+      </body>
+    </html>
   );
 }
