@@ -18,6 +18,9 @@ export default async function RootLayout({ children }) {
   const unread = user
     ? await prisma.notification.count({ where: { userId: user.id, read: false } })
     : 0;
+  const clientUser = user
+    ? { username: user.username, name: user.name, avatarUrl: user.avatarUrl }
+    : null;
   return (
     <html lang="en" className={`${sans.variable} ${display.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-canvas text-ink font-sans">
@@ -27,12 +30,9 @@ export default async function RootLayout({ children }) {
               "try{var t=localStorage.getItem('theme');if(t!=='light'){document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}",
           }}
         />
-        <TopBar
-          user={user ? { username: user.username, name: user.name, avatarUrl: user.avatarUrl } : null}
-          unread={unread}
-        />
+        <TopBar user={clientUser} unread={unread} />
         <main className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-28">{children}</main>
-        <BottomNav me={user ? user.username : null} unread={unread} />
+        <BottomNav user={clientUser} />
       </body>
     </html>
   );
