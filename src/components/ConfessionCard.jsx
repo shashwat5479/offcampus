@@ -55,7 +55,7 @@ export function ConfessionComposer() {
         <button
           onClick={post}
           disabled={busy || body.trim().length < 3}
-          className="rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-accentInk disabled:opacity-50"
+          className="rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
         >
           {busy ? "Posting…" : "Confess"}
         </button>
@@ -152,7 +152,7 @@ export function ConfessionItem({ c }) {
         {c.isPublic && (
           <span className="rounded bg-accent/12 px-1.5 py-0.5 font-medium text-accent">All colleges</span>
         )}
-        <span>· {timeAgo(c.createdAt)}</span>
+        <span suppressHydrationWarning>· {timeAgo(c.createdAt)}</span>
       </div>
 
       <p className="whitespace-pre-wrap text-sm text-ink">{c.body}</p>
@@ -193,7 +193,7 @@ export function ConfessionItem({ c }) {
             ) : (
               comments.map((cm) => (
                 <div key={cm.id} className="rounded-lg bg-canvas px-3 py-2">
-                  <div className="text-[11px] text-faint">Anonymous · {timeAgo(cm.createdAt)}</div>
+                  <div className="text-[11px] text-faint" suppressHydrationWarning>Anonymous · {timeAgo(cm.createdAt)}</div>
                   <p className="whitespace-pre-wrap text-sm text-ink">{cm.body}</p>
                 </div>
               ))
@@ -211,7 +211,7 @@ export function ConfessionItem({ c }) {
             <button
               onClick={sendComment}
               disabled={sending || !text.trim()}
-              className="rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accentInk disabled:opacity-50"
+              className="rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
             >
               Send
             </button>
