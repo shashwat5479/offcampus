@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import Avatar from "@/components/Avatar";
 import { timeAgo } from "@/lib/format";
 import RequestActions from "@/components/RequestActions";
+import FollowBackButton from "@/components/FollowBackButton";
 export const dynamic = "force-dynamic";
 
 const TEXT = {
@@ -29,11 +30,13 @@ export default async function NotificationsPage() {
     include: { actor: true },
   });
 
-  // which follow-request senders do I already follow? (for the "Follow back" state)
-  const requesterIds = items.filter((n) => n.type === "FOLLOW_REQUEST").map((n) => n.actorId);
-  const myFollows = requesterIds.length
+  // do I already follow the people who followed / requested me? (for Follow-back state)
+  const actorIds = items
+    .filter((n) => n.type === "FOLLOW" || n.type === "FOLLOW_REQUEST")
+    .map((n) => n.actorId);
+  const myFollows = actorIds.length
     ? await prisma.follow.findMany({
-        where: { followerId: user.id, followingId: { in: requesterIds } },
+        where: { followerId: user.id, followingId: { in: actorIds } },
         select: { followingId: true },
       })
     : [];
@@ -60,6 +63,7 @@ export default async function NotificationsPage() {
               <span className="font-semibold">@{n.actor.username}</span> {TEXT[n.type] || "interacted"}
             </div>
             <span className="text-xs text-faint">{timeAgo(n.createdAt)}</span>
+            {n.type === "FOLLOW" && <FollowBackButton userId={n.actor.id} iFollow={iFollow.has(n.actor.id)} />}
             {n.type === "FOLLOW_REQUEST" && <RequestActions requesterId={n.actor.id} iFollow={iFollow.has(n.actor.id)} />}
           </Link>
         ))}
