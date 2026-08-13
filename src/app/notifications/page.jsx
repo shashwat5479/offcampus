@@ -15,7 +15,7 @@ const TEXT = {
   COMMENT_VOTE: "upvoted your comment",
   FOLLOW_REQUEST: "requested to follow you",
   FOLLOW_ACCEPTED: "accepted your follow request",
-    MESSAGE: "sent you a message",
+  MESSAGE: "sent you a message",
 };
 
 export default async function NotificationsPage() {
@@ -28,6 +28,16 @@ export default async function NotificationsPage() {
     take: 50,
     include: { actor: true },
   });
+
+  // which follow-request senders do I already follow? (for the "Follow back" state)
+  const requesterIds = items.filter((n) => n.type === "FOLLOW_REQUEST").map((n) => n.actorId);
+  const myFollows = requesterIds.length
+    ? await prisma.follow.findMany({
+        where: { followerId: user.id, followingId: { in: requesterIds } },
+        select: { followingId: true },
+      })
+    : [];
+  const iFollow = new Set(myFollows.map((f) => f.followingId));
 
   // mark all as read when the page opens
   await prisma.notification.updateMany({ where: { userId: user.id, read: false }, data: { read: true } });
@@ -50,7 +60,7 @@ export default async function NotificationsPage() {
               <span className="font-semibold">@{n.actor.username}</span> {TEXT[n.type] || "interacted"}
             </div>
             <span className="text-xs text-faint">{timeAgo(n.createdAt)}</span>
-            {n.type === "FOLLOW_REQUEST" && <RequestActions requesterId={n.actor.id} />}
+            {n.type === "FOLLOW_REQUEST" && <RequestActions requesterId={n.actor.id} iFollow={iFollow.has(n.actor.id)} />}
           </Link>
         ))}
       </div>
