@@ -36,12 +36,14 @@ export default async function ProfilePage({ params }) {
 
   const isMe = me.id === user.id;
   let iFollow = false;
-  if (!isMe) {
-    const rel = await prisma.follow.findUnique({
-      where: { followerId_followingId: { followerId: me.id, followingId: user.id } },
-    });
-    iFollow = !!rel;
-  }
+let followState = "none";
+if (!isMe) {
+  const rel = await prisma.follow.findUnique({
+    where: { followerId_followingId: { followerId: me.id, followingId: user.id } },
+  });
+  iFollow = !!rel;
+  if (rel) followState = rel.status === "ACCEPTED" ? "following" : "requested";
+}
 
   const myVotes = await prisma.postVote.findMany({
     where: { userId: me.id, postId: { in: posts.map((p) => p.id) } },
@@ -69,7 +71,7 @@ export default async function ProfilePage({ params }) {
           </div>
 {!isMe && (
   <div className="flex items-center gap-2">
-    <FollowButton userId={user.id} following={iFollow} size="lg" />
+<FollowButton userId={user.id} status={followState} size="lg" />
     <MessageButton otherId={user.id} />
   </div>
 )}        </div>

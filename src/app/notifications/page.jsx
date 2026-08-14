@@ -30,19 +30,29 @@ export default async function NotificationsPage() {
     include: { actor: true },
   });
 
-  // do I already follow the people who followed / requested me? (for Follow-back state)
-  const actorIds = items
+  const followActorIds = items
     .filter((n) => n.type === "FOLLOW" || n.type === "FOLLOW_REQUEST")
     .map((n) => n.actorId);
-  const myFollows = actorIds.length
+
+  // do I follow them back? (for Follow-back state)
+  const myFollows = followActorIds.length
     ? await prisma.follow.findMany({
-        where: { followerId: user.id, followingId: { in: actorIds } },
+        where: { followerId: user.id, followingId: { in: followActorIds } },
         select: { followingId: true },
       })
     : [];
   const iFollow = new Set(myFollows.map((f) => f.followingId));
 
-  // mark all as read when the page opens
+  // is each request still pending (they -> me = PENDING)? if accepted already, don't re-show Accept
+  const reqIds = items.filter((n) => n.type === "FOLLOW_REQUEST").map((n) => n.actorId);
+  const theirFollows = reqIds.length
+    ? await prisma.follow.findMany({
+        where: { followerId: { in: reqIds }, followingId: user.id },
+        select: { followerId: true, status: true },
+      })
+    : [];
+  const reqStatus = new Map(theirFollows.map((f) => [f.followerId, f.status]));
+
   await prisma.notification.updateMany({ where: { userId: user.id, read: false }, data: { read: true } });
 
   return (
@@ -64,7 +74,13 @@ export default async function NotificationsPage() {
             </div>
             <span className="text-xs text-faint">{timeAgo(n.createdAt)}</span>
             {n.type === "FOLLOW" && <FollowBackButton userId={n.actor.id} iFollow={iFollow.has(n.actor.id)} />}
-            {n.type === "FOLLOW_REQUEST" && <RequestActions requesterId={n.actor.id} iFollow={iFollow.has(n.actor.id)} />}
+            {n.type === "FOLLOW_REQUEST" && (
+              <RequestActions
+                requesterId={n.actor.id}
+                iFollow={iFollow.has(n.actor.id)}
+                pending={reqStatus.get(n.actor.id) === "PENDING"}
+              />
+            )}
           </Link>
         ))}
       </div>
