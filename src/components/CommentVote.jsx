@@ -36,9 +36,9 @@ export default function CommentVote({ commentId, initialScore, initialDir = 0 })
 
   return (
     <div className="flex items-center gap-2 text-xs text-faint">
-      <button onClick={() => vote(1)} className="hover:text-up" style={{ color: dir === 1 ? "#e8543a" : undefined }}>▲</button>
+      <button onClick={() => vote(1)} className="hover:text-up" style={{ color: dir === 1 ? "#e5091a" : undefined }}>▲</button>
       <span className="font-semibold tabular-nums text-subtle">{score}</span>
-      <button onClick={() => vote(-1)} className="hover:text-accent" style={{ color: dir === -1 ? "#3b5bfd" : undefined }}>▼</button>
+      <button onClick={() => vote(-1)} className="hover:text-accent" style={{ color: dir === -1 ? "#8a8a94" : undefined }}>▼</button>
     </div>
   );
 }

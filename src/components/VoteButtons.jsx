@@ -43,22 +43,22 @@ export default function VoteButtons({ postId, initialScore, initialDir = 0 }) {
         onClick={() => vote(1)}
         aria-label="Upvote"
         className="rounded p-0.5 transition-transform active:scale-90"
-        style={{ color: dir === 1 ? "#e8543a" : "#9aa1ab" }}
+        style={{ color: dir === 1 ? "#e5091a" : "#9aa1ab" }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill={dir === 1 ? "#e8543a" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill={dir === 1 ? "#e5091a" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5l7 8h-4v6H9v-6H5z" />
         </svg>
       </button>
-      <span className="text-sm font-semibold tabular-nums" style={{ color: dir === 1 ? "#e8543a" : dir === -1 ? "#3b5bfd" : "rgb(var(--c-ink))" }}>
+      <span className="text-sm font-semibold tabular-nums" style={{ color: dir === 1 ? "#e5091a" : dir === -1 ? "#8a8a94" : "rgb(var(--c-ink))" }}>
         {score >= 1000 ? (score / 1000).toFixed(1).replace(/\.0$/, "") + "k" : score}
       </span>
       <button
         onClick={() => vote(-1)}
         aria-label="Downvote"
         className="rounded p-0.5 transition-transform active:scale-90"
-        style={{ color: dir === -1 ? "#3b5bfd" : "#9aa1ab" }}
+        style={{ color: dir === -1 ? "#8a8a94" : "#9aa1ab" }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill={dir === -1 ? "#3b5bfd" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill={dir === -1 ? "#8a8a94" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 19l-7-8h4V5h6v6h4z" />
         </svg>
       </button>

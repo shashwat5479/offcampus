@@ -3,26 +3,26 @@
 @tailwind utilities;
 
 :root {
-  /* light */
-  --c-ink: 24 24 27;
-  --c-subtle: 82 82 91;
-  --c-faint: 140 140 150;
-  --c-line: 231 231 231;
+  /* light — black/red, classy */
+  --c-ink: 17 8 9;
+  --c-subtle: 96 46 50;
+  --c-faint: 150 108 110;
+  --c-line: 236 214 215;
   --c-paper: 255 255 255;
-  --c-canvas: 250 250 249;
-  --c-accent: 101 84 232;
-  --c-up: 234 88 58;
+  --c-canvas: 250 246 246;
+  --c-accent: 200 16 34;
+  --c-up: 214 32 46;
 }
 .dark {
-  /* dark — neutral near-black with a clear elevation ladder */
-  --c-ink: 240 240 243;
-  --c-subtle: 161 161 170;
-  --c-faint: 112 112 122;
-  --c-line: 39 39 45;
-  --c-paper: 23 23 27;
-  --c-canvas: 11 11 13;
-  --c-accent: 139 122 255;
-  --c-up: 255 112 82;
+  /* dark — near-black with a crimson signature (default theme) */
+  --c-ink: 245 238 238;
+  --c-subtle: 190 158 160;
+  --c-faint: 124 92 94;
+  --c-line: 46 18 21;
+  --c-paper: 19 9 11;
+  --c-canvas: 8 4 5;
+  --c-accent: 229 9 20;
+  --c-up: 255 61 68;
 }
 
 html {
