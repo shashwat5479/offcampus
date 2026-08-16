@@ -7,12 +7,23 @@ import Avatar from "./Avatar";
 const REACTIONS = ["❤️","🔥","😂","😮","😢","👏"];
 const TENOR_KEY = "AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ";
 
+// ---- Emoji categories ----
+const EMOJI_CATS = {
+  "Smileys": ["😀","😃","😄","😁","😆","😅","🤣","😂","🥹","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😚","😙","🥲","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🫡","🤐","🤨","😐","😑","😶","🫥","😏","😒","🙄","😬","🤥","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🥳","🥸","😎","🤓","🧐","😕","🫤","😟","🙁","😮","😯","😲","😳","🥺","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡","😠","🤬","😈","👿","💀","☠️","💩","🤡","👹","👺","👻","👽","👾","🤖"],
+  "Hands": ["👋","🤚","🖐️","✋","🖖","🫱","🫲","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","👈","👉","👆","👇","☝️","🫵","👍","👎","✊","👊","🤛","🤜","👏","🙌","🫶","👐","🤲","🤝","🙏","💪","🦾"],
+  "Hearts": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","❤️‍🔥","❤️‍🩹","💟"],
+  "Animals": ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🙈","🙉","🙊","🐔","🐧","🐦","🦆","🦅","🦉","🐺","🐴","🦄","🐝","🦋","🐌","🐞","🐢","🐍","🐙","🐬","🐳","🦈","🐊"],
+  "Food": ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🍒","🍑","🥭","🍍","🥝","🍅","🥑","🌽","🥕","🍔","🍟","🍕","🌮","🍣","🍱","🍦","🍩","🍪","🎂","🧁","☕","🍵","🧋","🍷","🍺","🥤"],
+  "Objects": ["⚽","🏀","🏈","⚾","🎾","🏐","🎮","🕹️","🎯","🎲","🧩","🎭","🎨","🎬","🎤","🎧","🎵","🎹","🥁","📱","💻","⌨️","📷","📸","🔭","🔬","💡","🔥","✨","💫","⭐","🌟","💯","💥","🎉","🎊","🎈","🎁","🏆","🥇","📚","✏️","📌","📢"],
+};
+
+// ---- Sticker packs (large visual stickers) ----
 const STICKER_PACKS = {
-  "Smileys": ["😀","😃","😄","😁","😆","🤣","😂","🥹","😊","😇","🙂","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🫡","🤐","🤨","😐","😑","😶","🫥","😏","😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🥵","🥶","🥴","😵","🤯","🤠","🥳","🥸","😎","🤓","🧐","😕","🫤","😟","🙁","😮","😯","😲","😳","🥺","🥹","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡","😠","🤬","😈","👿","💀","☠️","💩","🤡","👹","👺","👻","👽","👾","🤖"],
-  "Hands": ["👋","🤚","🖐️","✋","🖖","🫱","🫲","🫳","🫴","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️","🫵","👍","👎","✊","👊","🤛","🤜","👏","🙌","🫶","👐","🤲","🤝","🙏","✍️","💅","🤳","💪","🦾"],
-  "Hearts": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","❤️‍🔥","❤️‍🩹","💟","♥️","🫶","😍","🥰","😘","💏","💑"],
-  "Animals": ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐻‍❄️","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🙈","🙉","🙊","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🪲","🪳","🦟","🦗","🕷️","🦂","🐢","🐍","🦎","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊"],
-  "Food": ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶️","🫑","🌽","🥕","🫒","🧄","🧅","🥔","🍠","🫘","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🧈","🥞","🧇","🥓","🥩","🍗","🍖","🌭","🍔","🍟","🍕","🫓","🥪","🥙","🧆","🌮","🌯","🫔","🥗","🥘","🫕","🥫","🍝","🍜","🍲","🍛","🍣","🍱","🥟","🦪","🍤","🍙","🍚","🍘","🍥","🥠","🥮","🍢","🍡","🍧","🍨","🍦","🥧","🧁","🍰","🎂","🍮","🍭","🍬","🍫","🍿","🍩","🍪","🌰","🥜","🍯"],
+  "Popular": ["😀","😍","🥺","😎","🤩","😤","🥳","🤯","😭","🤗","🫶","👀","🔥","💀","👻","🤖","💩","👽","🫡","🤌","👊","✊","🤝","👏","🙌","💪","🫰","✌️","👋","🤙"],
+  "Love": ["❤️","💕","💖","💗","💓","💞","💘","💝","🥰","😍","😘","💑","💏","🫶","❤️‍🔥","💔","🥹","😻","💐","🌹"],
+  "Reactions": ["👍","👎","😂","🤣","😮","😱","🥵","🥶","🤮","🤯","💯","✅","❌","⚠️","🚫","❓","❗","🆗","🆘","🔝"],
+  "Vibes": ["🎉","🎊","🎈","🥳","🎯","🚀","⭐","✨","💫","🌈","☀️","🌙","⚡","🔥","❄️","🌊","🍃","🎵","🎶","🎤"],
+  "Food": ["🍕","🍔","🍟","🌮","🍣","🍱","🍜","🍛","🍩","🍪","🧁","🎂","🍦","☕","🧋","🍿","🥐","🍳","🥗","🍝"],
 };
 
 function fmtTime(d) {
@@ -42,28 +53,39 @@ function applyReaction(list, { messageId, userId, emoji }) {
   });
 }
 
-function getFavStickers() { try { return JSON.parse(localStorage.getItem("oc_fav_stickers") || "[]"); } catch { return []; } }
-function setFavStickers(arr) { try { localStorage.setItem("oc_fav_stickers", JSON.stringify(arr.slice(0, 50))); } catch {} }
+// Favorites persistence
+function getFavs(key) { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; } }
+function setFavsStore(key, arr) { try { localStorage.setItem(key, JSON.stringify(arr.slice(0, 60))); } catch {} }
 
 export default function ChatRoom({ conversationId, meId, other, initialMessages }) {
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [panel, setPanel] = useState(null); // null | "sticker" | "gif"
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelTab, setPanelTab] = useState("emoji"); // emoji | sticker | gif
+  const [emojiCat, setEmojiCat] = useState("Smileys");
   const [stickerPack, setStickerPack] = useState("Favourites");
-  const [favs, setFavs] = useState([]);
+  const [stickerFavs, setStickerFavs] = useState([]);
+  const [gifFavs, setGifFavs] = useState([]);
+  const [customStickers, setCustomStickers] = useState([]);
+  const [gifs, setGifs] = useState([]);
+  const [gifQ, setGifQ] = useState("");
+  const [gifLoading, setGifLoading] = useState(false);
   const [reactFor, setReactFor] = useState(null);
   const [replyTo, setReplyTo] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
-  const [gifs, setGifs] = useState([]);
-  const [gifQ, setGifQ] = useState("");
-  const [gifLoading, setGifLoading] = useState(false);
   const [mentioning, setMentioning] = useState(false);
+  const [saveToast, setSaveToast] = useState(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const fileRef = useRef(null);
 
-  useEffect(() => { setFavs(getFavStickers()); }, []);
+  useEffect(() => {
+    setStickerFavs(getFavs("oc_fav_stickers"));
+    setGifFavs(getFavs("oc_fav_gifs"));
+    setCustomStickers(getFavs("oc_custom_stickers"));
+  }, []);
 
   useEffect(() => {
     let client, channel, cancelled = false;
@@ -82,13 +104,12 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   const query = search.trim().toLowerCase();
   const visible = useMemo(() => (query ? messages.filter((m) => (m.body || "").toLowerCase().includes(query)) : messages), [messages, query]);
 
-  // Load trending GIFs when GIF panel opens
+  // ---- GIF ----
   const loadTrending = useCallback(async () => {
     setGifLoading(true);
     try {
       const res = await fetch(`https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=20&media_filter=tinygif,gif`);
-      const d = await res.json();
-      setGifs(d.results || []);
+      const d = await res.json(); setGifs(d.results || []);
     } catch { setGifs([]); }
     setGifLoading(false);
   }, []);
@@ -99,22 +120,18 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
     setGifLoading(true);
     try {
       const res = await fetch(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=${TENOR_KEY}&limit=20&media_filter=tinygif,gif`);
-      const d = await res.json();
-      setGifs(d.results || []);
+      const d = await res.json(); setGifs(d.results || []);
     } catch { setGifs([]); }
     setGifLoading(false);
   }
 
-  function openPanel(p) {
-    if (panel === p) { setPanel(null); return; }
-    setPanel(p);
-    if (p === "gif") loadTrending();
-  }
+  function gifUrl(g) { return g.media_formats?.tinygif?.url || g.media_formats?.gif?.url || ""; }
 
+  // ---- Send ----
   async function sendMsg(body) {
     const msg = (body || text).trim();
     if (!msg || sending) return;
-    setSending(true); setText(""); setPanel(null);
+    setSending(true); setText(""); setPanelOpen(false);
     const currentReply = replyTo; setReplyTo(null);
     try {
       const res = await fetch("/api/message", {
@@ -127,16 +144,46 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
     } catch { setText(msg); setReplyTo(currentReply); } finally { setSending(false); }
   }
 
-  function sendSticker(s) { sendMsg(s); }
-  function sendGif(url) { sendMsg(url); setPanel(null); setGifs([]); setGifQ(""); }
-
-  function toggleFav(s) {
-    setFavs((prev) => {
+  // ---- Favorites ----
+  function toggleStickerFav(s) {
+    setStickerFavs((prev) => {
       const next = prev.includes(s) ? prev.filter((x) => x !== s) : [s, ...prev];
-      setFavStickers(next); return next;
+      setFavsStore("oc_fav_stickers", next); return next;
     });
   }
+  function toggleGifFav(url) {
+    setGifFavs((prev) => {
+      const next = prev.includes(url) ? prev.filter((x) => x !== url) : [url, ...prev];
+      setFavsStore("oc_fav_gifs", next); return next;
+    });
+  }
+  function saveReceivedToFav(body) {
+    if (body?.match(/^https?:\/\/.*\.(gif|webp)/i)) {
+      toggleGifFav(body);
+      setSaveToast("GIF saved to favourites!");
+    } else if (body && [...body].length <= 2 && /^\p{Emoji}/u.test(body)) {
+      toggleStickerFav(body);
+      setSaveToast("Sticker saved to favourites!");
+    }
+    setTimeout(() => setSaveToast(null), 1500);
+  }
 
+  // ---- Custom stickers ----
+  function createSticker(e) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = reader.result;
+      setCustomStickers((prev) => {
+        const next = [url, ...prev].slice(0, 30);
+        setFavsStore("oc_custom_stickers", next); return next;
+      });
+    };
+    reader.readAsDataURL(f);
+  }
+
+  // ---- Reactions ----
   async function react(messageId, emoji) {
     setReactFor(null);
     setMessages((prev) => {
@@ -148,24 +195,30 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
     try { await fetch("/api/message/react", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messageId, emoji }) }); } catch {}
   }
 
+  // ---- Mentions ----
   function handleInput(e) {
-    const v = e.target.value;
-    setText(v);
-    const atMatch = v.match(/@(\w*)$/);
-    setMentioning(!!atMatch);
+    setText(e.target.value);
+    setMentioning(e.target.value.match(/@(\w*)$/) !== null);
   }
-
   function insertMention() {
     setText((t) => t.replace(/@\w*$/, `@${other.username} `));
-    setMentioning(false);
-    inputRef.current?.focus();
+    setMentioning(false); inputRef.current?.focus();
   }
 
-  const gifUrl = (g) => g.media_formats?.tinygif?.url || g.media_formats?.gif?.url || "";
+  // ---- Panel toggle ----
+  function openTab(tab) {
+    if (panelOpen && panelTab === tab) { setPanelOpen(false); return; }
+    setPanelOpen(true); setPanelTab(tab);
+    if (tab === "gif") loadTrending();
+  }
+
+  const isGif = (b) => b?.match(/^https?:\/\/.*\.(gif|webp)/i);
+  const isSingleEmoji = (b) => b && [...b].length <= 2 && /^\p{Emoji}/u.test(b);
+  const isCustomSticker = (b) => b?.startsWith("data:image/");
 
   return (
     <div className="mx-auto flex h-[100dvh] max-w-feed flex-col">
-      {/* header */}
+      {/* Header */}
       <div className="flex items-center gap-3 border-b border-line px-2 py-3">
         <Link href="/messages" className="text-lg text-subtle hover:text-ink">←</Link>
         <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={38} />
@@ -175,19 +228,21 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         </div>
         <button onClick={() => { setShowSearch((s) => { if (s) setSearch(""); return !s; }); }}
           className={`rounded-full p-2 ${showSearch ? "text-accent" : "text-subtle"}`}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" /><path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/><path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
         </button>
       </div>
 
       {showSearch && (
         <div className="flex items-center gap-2 border-b border-line bg-canvas px-3 py-2">
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search messages…" autoFocus
-            className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-faint" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search messages…" autoFocus className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-faint" />
           {search && <button onClick={() => setSearch("")} className="text-xs text-subtle">Clear</button>}
         </div>
       )}
 
-      {/* messages */}
+      {/* Toast */}
+      {saveToast && <div className="mx-auto mt-1 rounded-full bg-accent/20 px-3 py-1 text-xs font-medium text-accent">{saveToast}</div>}
+
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-2 py-4">
         <div className="flex flex-col gap-1.5">
           {query && visible.length === 0 && <p className="py-8 text-center text-sm text-faint">No messages match.</p>}
@@ -195,20 +250,20 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
             const mine = m.senderId === meId;
             const reactions = m.reactions || [];
             const emojis = [...new Set(reactions.map((r) => r.emoji))];
-            const isGif = m.body?.match(/^https?:\/\/.*\.(gif|webp)/i);
-            const isSingleEmoji = m.body && [...m.body].length <= 2 && /^\p{Emoji}/u.test(m.body);
             return (
               <div key={m.id} className={`group flex items-end gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
                 {!mine && <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={26} />}
                 <div className={`relative flex max-w-[72%] flex-col ${mine ? "items-end" : "items-start"}`}>
                   {m.replySnippet && (
-                    <div className={`mb-0.5 max-w-full truncate rounded-lg border-l-2 border-accent bg-canvas/60 px-2 py-1 text-[11px] text-subtle`}>
+                    <div className="mb-0.5 max-w-full truncate rounded-lg border-l-2 border-accent bg-canvas/60 px-2 py-1 text-[11px] text-subtle">
                       <span className="text-faint">{m.replyFromMe ? "You" : other.name}: </span>{m.replySnippet}
                     </div>
                   )}
-                  {isGif ? (
+                  {isGif(m.body) ? (
                     <img src={m.body} alt="GIF" className={`max-w-[200px] rounded-2xl ${mine ? "rounded-br-md" : "rounded-bl-md"}`} />
-                  ) : isSingleEmoji ? (
+                  ) : isCustomSticker(m.body) ? (
+                    <img src={m.body} alt="Sticker" className="h-28 w-28 rounded-xl object-contain" />
+                  ) : isSingleEmoji(m.body) ? (
                     <span className="text-5xl">{m.body}</span>
                   ) : (
                     <div className={`rounded-2xl px-3.5 py-2 text-sm ${mine ? "rounded-br-md bg-accent text-white" : "rounded-bl-md bg-canvas text-ink"}`}>{m.body}</div>
@@ -219,11 +274,15 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
                       <span className="rounded-full border border-line bg-paper px-1.5 py-0.5 text-xs shadow-sm">{emojis.join("")}{reactions.length > 1 ? ` ${reactions.length}` : ""}</span>
                     </div>
                   )}
+                  {/* Reaction + reply + save bar */}
                   <div className={`absolute top-1/2 -translate-y-1/2 ${mine ? "right-full mr-1" : "left-full ml-1"}`}>
                     {reactFor === m.id ? (
                       <div className="flex items-center gap-0.5 rounded-full border border-line bg-paper px-1.5 py-1 shadow-lg">
                         {REACTIONS.map((e) => <button key={e} onClick={() => react(m.id, e)} className="text-base hover:scale-125">{e}</button>)}
                         <button onClick={() => { setReplyTo({ id: m.id, body: m.body, mine }); setReactFor(null); }} className="ml-1 border-l border-line pl-1.5 text-xs text-subtle">↩</button>
+                        {!mine && (isGif(m.body) || isSingleEmoji(m.body)) && (
+                          <button onClick={() => { saveReceivedToFav(m.body); setReactFor(null); }} className="ml-1 border-l border-line pl-1.5 text-xs text-subtle">★</button>
+                        )}
                       </div>
                     ) : (
                       <button onClick={() => setReactFor(m.id)} className="text-sm text-faint opacity-0 group-hover:opacity-100">☺</button>
@@ -237,7 +296,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         </div>
       </div>
 
-      {/* reply bar */}
+      {/* Reply bar */}
       {replyTo && (
         <div className="flex items-center gap-2 border-t border-line bg-canvas px-3 py-2 text-xs">
           <div className="min-w-0 flex-1">
@@ -248,77 +307,151 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         </div>
       )}
 
-      {/* mention suggestion */}
+      {/* Mention suggestion */}
       {mentioning && (
         <div className="border-t border-line bg-paper px-3 py-2">
           <button onClick={insertMention} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-canvas">
             <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={24} />
             <span className="font-medium text-ink">@{other.username}</span>
-            <span className="text-xs text-subtle">{other.name}</span>
           </button>
         </div>
       )}
 
-      {/* sticker panel */}
-      {panel === "sticker" && (
+      {/* ===== WhatsApp-style panel with 3 tabs ===== */}
+      {panelOpen && (
         <div className="border-t border-line bg-paper">
-          <div className="flex gap-1 overflow-x-auto border-b border-line px-2 py-1.5">
-            {["Favourites", ...Object.keys(STICKER_PACKS)].map((p) => (
-              <button key={p} onClick={() => setStickerPack(p)}
-                className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${stickerPack === p ? "bg-accent text-white" : "text-subtle hover:text-ink"}`}>{p}</button>
+          {/* Tab bar */}
+          <div className="flex border-b border-line">
+            {[["emoji","😊 Emoji"],["sticker","🎭 Stickers"],["gif","GIF"]].map(([id, label]) => (
+              <button key={id} onClick={() => openTab(id)}
+                className={`flex-1 py-2 text-xs font-semibold transition-colors ${panelTab === id ? "border-b-2 border-accent text-accent" : "text-subtle"}`}>{label}</button>
             ))}
           </div>
-          <div className="grid max-h-48 grid-cols-5 gap-1 overflow-y-auto p-2">
-            {(stickerPack === "Favourites" ? favs : STICKER_PACKS[stickerPack] || []).map((s, i) => (
-              <div key={`${s}-${i}`} className="group relative">
-                <button onClick={() => sendSticker(s)} className="flex h-14 w-full items-center justify-center rounded-xl bg-canvas text-3xl transition-transform hover:scale-110">{s}</button>
-                <button onClick={() => toggleFav(s)}
-                  className={`absolute -right-0.5 -top-0.5 rounded-full bg-paper p-0.5 text-[10px] opacity-0 shadow group-hover:opacity-100 ${favs.includes(s) ? "text-accent" : "text-faint"}`}>
-                  {favs.includes(s) ? "★" : "☆"}
-                </button>
-              </div>
-            ))}
-            {stickerPack === "Favourites" && favs.length === 0 && (
-              <p className="col-span-5 py-4 text-center text-xs text-faint">Long-press any sticker to add to favourites</p>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* GIF panel */}
-      {panel === "gif" && (
-        <div className="border-t border-line bg-paper">
-          <div className="px-2 pt-2">
-            <input value={gifQ} onChange={(e) => searchGifs(e.target.value)} placeholder="Search GIFs…" autoFocus
-              className="w-full rounded-full border border-line bg-canvas px-3 py-1.5 text-sm text-ink outline-none placeholder:text-faint" />
-          </div>
-          <div className="max-h-52 overflow-y-auto p-2">
-            {gifLoading ? (
-              <p className="py-6 text-center text-xs text-faint">Loading…</p>
-            ) : gifs.length > 0 ? (
-              <div className="grid grid-cols-3 gap-1">
-                {gifs.map((g) => (
-                  <button key={g.id} onClick={() => sendGif(gifUrl(g))} className="overflow-hidden rounded-lg transition-transform hover:scale-105">
-                    <img src={gifUrl(g)} alt="" className="h-24 w-full object-cover" loading="lazy" />
-                  </button>
+          {/* EMOJI tab */}
+          {panelTab === "emoji" && (
+            <div>
+              <div className="flex gap-1 overflow-x-auto border-b border-line px-2 py-1">
+                {Object.keys(EMOJI_CATS).map((c) => (
+                  <button key={c} onClick={() => setEmojiCat(c)}
+                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${emojiCat === c ? "bg-accent text-white" : "text-subtle"}`}>{c}</button>
                 ))}
               </div>
-            ) : (
-              <p className="py-6 text-center text-xs text-faint">{gifQ.trim() ? "No GIFs found" : "Trending GIFs"}</p>
-            )}
-          </div>
-          <p className="border-t border-line px-2 py-1 text-[9px] text-faint">Powered by Tenor</p>
+              <div className="grid max-h-48 grid-cols-8 gap-0.5 overflow-y-auto p-2">
+                {(EMOJI_CATS[emojiCat] || []).map((e, i) => (
+                  <button key={`${e}-${i}`} onClick={() => setText((t) => t + e)} className="rounded p-1 text-xl hover:bg-canvas">{e}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* STICKER tab */}
+          {panelTab === "sticker" && (
+            <div>
+              <div className="flex gap-1 overflow-x-auto border-b border-line px-2 py-1">
+                <button onClick={() => setStickerPack("Favourites")} className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${stickerPack === "Favourites" ? "bg-accent text-white" : "text-subtle"}`}>★ Favs</button>
+                <button onClick={() => setStickerPack("Custom")} className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${stickerPack === "Custom" ? "bg-accent text-white" : "text-subtle"}`}>✏️ Custom</button>
+                {Object.keys(STICKER_PACKS).map((p) => (
+                  <button key={p} onClick={() => setStickerPack(p)} className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${stickerPack === p ? "bg-accent text-white" : "text-subtle"}`}>{p}</button>
+                ))}
+              </div>
+              <div className="max-h-48 overflow-y-auto p-2">
+                {stickerPack === "Custom" ? (
+                  <div className="grid grid-cols-4 gap-2">
+                    <button onClick={() => fileRef.current?.click()} className="flex h-20 items-center justify-center rounded-xl border-2 border-dashed border-line text-2xl text-faint hover:border-accent hover:text-accent">+</button>
+                    <input ref={fileRef} type="file" accept="image/*" onChange={createSticker} className="hidden" />
+                    {customStickers.map((url, i) => (
+                      <div key={i} className="group relative">
+                        <button onClick={() => sendMsg(url)} className="flex h-20 w-full items-center justify-center rounded-xl bg-canvas p-1">
+                          <img src={url} alt="" className="max-h-full max-w-full object-contain" />
+                        </button>
+                        <button onClick={() => toggleStickerFav(url)} className={`absolute -right-1 -top-1 rounded-full bg-paper p-0.5 text-[10px] shadow opacity-0 group-hover:opacity-100 ${stickerFavs.includes(url) ? "text-accent" : "text-faint"}`}>
+                          {stickerFavs.includes(url) ? "★" : "☆"}
+                        </button>
+                      </div>
+                    ))}
+                    {customStickers.length === 0 && <p className="col-span-3 py-4 text-center text-xs text-faint">Tap + to create a sticker from any image</p>}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {(stickerPack === "Favourites" ? stickerFavs : STICKER_PACKS[stickerPack] || []).map((s, i) => (
+                      <div key={`${s}-${i}`} className="group relative">
+                        <button onClick={() => sendMsg(s)}
+                          className="flex h-14 w-full items-center justify-center rounded-xl bg-canvas text-3xl transition-transform hover:scale-110">
+                          {s.startsWith("data:") ? <img src={s} alt="" className="max-h-full max-w-full object-contain" /> : s}
+                        </button>
+                        <button onClick={() => toggleStickerFav(s)}
+                          className={`absolute -right-0.5 -top-0.5 rounded-full bg-paper p-0.5 text-[10px] shadow opacity-0 group-hover:opacity-100 ${stickerFavs.includes(s) ? "text-accent" : "text-faint"}`}>
+                          {stickerFavs.includes(s) ? "★" : "☆"}
+                        </button>
+                      </div>
+                    ))}
+                    {stickerPack === "Favourites" && stickerFavs.length === 0 && <p className="col-span-5 py-4 text-center text-xs text-faint">Tap ★ on any sticker to save here</p>}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* GIF tab */}
+          {panelTab === "gif" && (
+            <div>
+              <div className="flex gap-1 overflow-x-auto border-b border-line px-2 py-1">
+                <button onClick={() => { setGifQ(""); loadTrending(); }} className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${!gifQ.trim() ? "bg-accent text-white" : "text-subtle"}`}>🔥 Trending</button>
+                <button onClick={() => setGifQ("favourites")} className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${gifQ === "favourites" ? "bg-accent text-white" : "text-subtle"}`}>★ Favs</button>
+              </div>
+              <div className="px-2 pt-2">
+                <input value={gifQ === "favourites" ? "" : gifQ} onChange={(e) => searchGifs(e.target.value)} placeholder="Search GIFs…"
+                  className="w-full rounded-full border border-line bg-canvas px-3 py-1.5 text-sm text-ink outline-none placeholder:text-faint" />
+              </div>
+              <div className="max-h-48 overflow-y-auto p-2">
+                {gifQ === "favourites" ? (
+                  gifFavs.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-1">
+                      {gifFavs.map((url, i) => (
+                        <div key={i} className="group relative">
+                          <button onClick={() => sendMsg(url)} className="overflow-hidden rounded-lg">
+                            <img src={url} alt="" className="h-24 w-full object-cover" loading="lazy" />
+                          </button>
+                          <button onClick={() => toggleGifFav(url)} className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100">★</button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : <p className="py-6 text-center text-xs text-faint">Save GIFs from trending or from messages using ★</p>
+                ) : gifLoading ? (
+                  <p className="py-6 text-center text-xs text-faint">Loading…</p>
+                ) : gifs.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-1">
+                    {gifs.map((g) => (
+                      <div key={g.id} className="group relative">
+                        <button onClick={() => sendMsg(gifUrl(g))} className="overflow-hidden rounded-lg hover:scale-105 transition-transform">
+                          <img src={gifUrl(g)} alt="" className="h-24 w-full object-cover" loading="lazy" />
+                        </button>
+                        <button onClick={() => toggleGifFav(gifUrl(g))}
+                          className={`absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 ${gifFavs.includes(gifUrl(g)) ? "text-accent" : ""}`}>
+                          {gifFavs.includes(gifUrl(g)) ? "★" : "☆"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="py-6 text-center text-xs text-faint">{gifQ.trim() ? "No GIFs found" : "Loading trending…"}</p>}
+              </div>
+              <p className="border-t border-line px-2 py-1 text-[9px] text-faint">Powered by Tenor</p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* input bar — pinned to bottom */}
-      <div className="flex items-center gap-2 border-t border-line bg-paper px-2 py-3">
-        <button onClick={() => openPanel("sticker")} className={`rounded-full p-1.5 ${panel === "sticker" ? "text-accent" : "text-subtle"}`}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
-        </button>
-        <button onClick={() => openPanel("gif")} className={`rounded-full p-1.5 text-xs font-bold ${panel === "gif" ? "text-accent" : "text-subtle"}`}>GIF</button>
+      {/* Input bar */}
+      <div className="flex items-center gap-1.5 border-t border-line bg-paper px-2 py-3">
+        <button onClick={() => openTab("emoji")} className={`rounded-full p-1.5 text-lg ${panelOpen && panelTab === "emoji" ? "text-accent" : "text-subtle"}`}>😊</button>
         <input ref={inputRef} value={text} onChange={handleInput} onKeyDown={(e) => e.key === "Enter" && sendMsg()}
+          onFocus={() => setPanelOpen(false)}
           placeholder="Message…" className="flex-1 rounded-full border border-line bg-canvas px-4 py-2 text-sm text-ink outline-none focus:border-accent" />
+        <button onClick={() => openTab("sticker")} className={`rounded-full p-1.5 ${panelOpen && panelTab === "sticker" ? "text-accent" : "text-subtle"}`}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button onClick={() => openTab("gif")} className={`rounded-full px-1.5 py-1 text-[11px] font-extrabold ${panelOpen && panelTab === "gif" ? "text-accent" : "text-subtle"}`}>GIF</button>
         <button onClick={() => sendMsg()} disabled={sending || !text.trim()} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Send</button>
       </div>
     </div>
