@@ -8,8 +8,9 @@ import { uploadFile } from "@/lib/upload";
 const MAX_MEDIA_MB = 50;
 
 const REACTIONS = ["❤️","🔥","😂","😮","😢","👏"];
-// Move this to an env var (NEXT_PUBLIC_TENOR_KEY) — see the note at the end of the chat response.
-const TENOR_KEY = process.env.NEXT_PUBLIC_TENOR_KEY || "AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ";
+// GIPHY replaced Tenor (Tenor's public API was discontinued June 30, 2026).
+// Get a free key at https://developers.giphy.com/dashboard and set NEXT_PUBLIC_GIPHY_KEY in your env.
+const GIPHY_KEY = process.env.NEXT_PUBLIC_GIPHY_KEY || "";
 
 // ---- Emoji categories ----
 const EMOJI_CATS = {
@@ -111,12 +112,13 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   const query = search.trim().toLowerCase();
   const visible = useMemo(() => (query ? messages.filter((m) => (m.body || "").toLowerCase().includes(query)) : messages), [messages, query]);
 
-  // ---- GIF ----
+  // ---- GIF (via GIPHY) ----
   const loadTrending = useCallback(async () => {
+    if (!GIPHY_KEY) { setGifs([]); return; }
     setGifLoading(true);
     try {
-      const res = await fetch(`https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=20&media_filter=tinygif,gif`);
-      const d = await res.json(); setGifs(d.results || []);
+      const res = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=20&rating=pg-13`);
+      const d = await res.json(); setGifs(d.data || []);
     } catch { setGifs([]); }
     setGifLoading(false);
   }, []);
@@ -124,15 +126,16 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   async function searchGifs(q) {
     setGifQ(q);
     if (!q.trim()) { loadTrending(); return; }
+    if (!GIPHY_KEY) { setGifs([]); return; }
     setGifLoading(true);
     try {
-      const res = await fetch(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=${TENOR_KEY}&limit=20&media_filter=tinygif,gif`);
-      const d = await res.json(); setGifs(d.results || []);
+      const res = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(q)}&limit=20&rating=pg-13`);
+      const d = await res.json(); setGifs(d.data || []);
     } catch { setGifs([]); }
     setGifLoading(false);
   }
 
-  function gifUrl(g) { return g.media_formats?.tinygif?.url || g.media_formats?.gif?.url || ""; }
+  function gifUrl(g) { return g.images?.fixed_height?.url || g.images?.original?.url || ""; }
 
   // ---- Send ----
   async function sendMsg(body) {
@@ -466,6 +469,8 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
                   ) : <p className="py-6 text-center text-xs text-faint">Save GIFs from trending or from messages using ★</p>
                 ) : gifLoading ? (
                   <p className="py-6 text-center text-xs text-faint">Loading…</p>
+                ) : !GIPHY_KEY ? (
+                  <p className="py-6 text-center text-xs text-faint">GIF search isn't configured yet. Add NEXT_PUBLIC_GIPHY_KEY to enable it.</p>
                 ) : gifs.length > 0 ? (
                   <div className="grid grid-cols-3 gap-1">
                     {gifs.map((g) => (
@@ -482,7 +487,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
                   </div>
                 ) : <p className="py-6 text-center text-xs text-faint">{gifQ.trim() ? "No GIFs found" : "Loading trending…"}</p>}
               </div>
-              <p className="border-t border-line px-2 py-1 text-[9px] text-faint">Powered by Tenor</p>
+              <p className="border-t border-line px-2 py-1 text-[9px] text-faint">Powered by GIPHY</p>
             </div>
           )}
         </div>
