@@ -21,7 +21,33 @@ export default function StoryViewer({ author, stories, isOwner }) {
   const [sent, setSent] = useState(false);
   const timer = useRef(null);
   const audioRef = useRef(null);
+  const holdTimer = useRef(null);
+  const wasHeld = useRef(false);
+  const touchStartY = useRef(null);
   const cur = stories[i];
+
+  // ---- Press-and-hold to pause (Instagram-style), tap to navigate ----
+  function onPressStart() {
+    wasHeld.current = false;
+    holdTimer.current = setTimeout(() => { wasHeld.current = true; setPaused(true); }, 180);
+  }
+  function onPressEnd() {
+    clearTimeout(holdTimer.current);
+    if (wasHeld.current) setPaused(false);
+  }
+  function navIfNotHeld(fn) {
+    if (wasHeld.current) { wasHeld.current = false; return; }
+    fn();
+  }
+
+  // ---- Swipe down to close ----
+  function onTouchStart(e) { touchStartY.current = e.touches?.[0]?.clientY ?? null; }
+  function onTouchEnd(e) {
+    if (touchStartY.current == null) return;
+    const dy = (e.changedTouches?.[0]?.clientY ?? 0) - touchStartY.current;
+    touchStartY.current = null;
+    if (dy > 90) close();
+  }
 
   function close() { router.push("/"); }
   function next() { i < stories.length - 1 ? setI(i + 1) : close(); }
@@ -101,21 +127,22 @@ export default function StoryViewer({ author, stories, isOwner }) {
   if (!cur) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
-      <div className="relative flex h-full max-h-[92vh] w-full max-w-[420px] flex-col">
-        <div className="absolute left-0 right-0 top-2 z-10 flex gap-1 px-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+      onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <div className="relative flex h-[100dvh] w-full max-w-[420px] flex-col">
+        <div className="absolute left-0 right-0 z-10 flex gap-1 px-3" style={{ top: "calc(0.5rem + env(safe-area-inset-top))" }}>
           {stories.map((s, idx) => (
             <div key={s.id} className="h-0.5 flex-1 overflow-hidden rounded-full bg-white/30">
-              <div className="h-full bg-white" style={{ width: idx < i ? "100%" : idx === i ? `${progress * 100}%` : "0%" }} />
+              <div className={`h-full bg-white ${idx === i && !paused ? "transition-[width]" : ""}`} style={{ width: idx < i ? "100%" : idx === i ? `${progress * 100}%` : "0%" }} />
             </div>
           ))}
         </div>
 
-        <div className="absolute left-3 top-5 z-10 flex items-center gap-2">
+        <div className="absolute left-3 z-10 flex items-center gap-2" style={{ top: "calc(1.25rem + env(safe-area-inset-top))" }}>
           <Avatar name={author.name} seed={author.id} src={author.avatarUrl} size={32} />
           <span className="text-sm font-semibold text-white drop-shadow">{author.username}</span>
         </div>
-        <button onClick={close} className="absolute right-3 top-5 z-10 text-2xl leading-none text-white/90">×</button>
+        <button onClick={close} aria-label="Close" className="absolute right-3 z-10 text-2xl leading-none text-white/90" style={{ top: "calc(1.25rem + env(safe-area-inset-top))" }}>×</button>
 
         {cur.type === "VIDEO" ? (
           <video key={cur.id} src={cur.mediaUrl} autoPlay onEnded={next} className="h-full w-full object-contain" style={cur.filter ? { filter: {"Warm":"sepia(0.35) saturate(1.3)","Cool":"saturate(0.8) hue-rotate(15deg) brightness(1.05)","B&W":"grayscale(1)","Vintage":"sepia(0.5) contrast(0.9) brightness(1.1)","Vivid":"saturate(1.6) contrast(1.1)","Fade":"brightness(1.15) contrast(0.85) saturate(0.7)","Drama":"contrast(1.3) brightness(0.95) saturate(1.2)"}[cur.filter] || undefined } : undefined} />
@@ -136,8 +163,14 @@ export default function StoryViewer({ author, stories, isOwner }) {
           </div>
         )}
 
-        <button onClick={prev} className="absolute left-0 top-0 z-0 h-[calc(100%-8rem)] w-1/3" aria-label="Previous" />
-        <button onClick={next} className="absolute right-0 top-0 z-0 h-[calc(100%-8rem)] w-1/3" aria-label="Next" />
+        <button
+          onPointerDown={onPressStart} onPointerUp={onPressEnd} onPointerLeave={onPressEnd}
+          onClick={() => navIfNotHeld(prev)}
+          className="absolute left-0 top-0 z-0 h-[calc(100%-8rem)] w-1/3" aria-label="Previous / hold to pause" />
+        <button
+          onPointerDown={onPressStart} onPointerUp={onPressEnd} onPointerLeave={onPressEnd}
+          onClick={() => navIfNotHeld(next)}
+          className="absolute right-0 top-0 z-0 h-[calc(100%-8rem)] w-1/3" aria-label="Next / hold to pause" />
 
         {burst && (
           <div key={burst.k} className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
@@ -148,12 +181,13 @@ export default function StoryViewer({ author, stories, isOwner }) {
         {isOwner ? (
           <button
             onClick={openViewers}
-            className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-medium text-white backdrop-blur"
+            className="absolute left-1/2 z-20 -translate-x-1/2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-medium text-white backdrop-blur"
+            style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}
           >
             👁 Reactions
           </button>
         ) : (
-          <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2 p-3">
+          <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             <div className="flex justify-center gap-3">
               {EMOJIS.map((e) => (
                 <button

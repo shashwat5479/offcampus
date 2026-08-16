@@ -33,7 +33,7 @@ export default async function ConversationPage({ params }) {
       conversationId={convo.id}
       meId={user.id}
       other={{ id: other.id, name: other.name, username: other.username, avatarUrl: other.avatarUrl }}
-      initialMessages={messages.map((m) => ({ id: m.id, senderId: m.senderId, body: m.body, storyMediaUrl: m.storyMediaUrl, storyMediaType: m.storyMediaType, reactions: m.reactions, replyToId: m.replyToId, replySnippet: m.replyTo?.body?.slice(0, 80) || null, replyFromMe: m.replyTo ? m.replyTo.senderId === user.id : null, createdAt: m.createdAt }))}
+      initialMessages={messages.map((m) => ({ id: m.id, senderId: m.senderId, body: m.body, mediaUrl: m.mediaUrl || null, mediaType: m.mediaType || null, storyMediaUrl: m.storyMediaUrl, storyMediaType: m.storyMediaType, reactions: m.reactions, replyToId: m.replyToId, replySnippet: m.replyTo?.body?.slice(0, 80) || null, replyFromMe: m.replyTo ? m.replyTo.senderId === user.id : null, createdAt: m.createdAt }))}
       />
     );
 }

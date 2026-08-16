@@ -14,7 +14,16 @@ export async function POST(request) {
 
   const toUserId = body.toUserId;
   const text = (body.body || "").trim();
-  if (!toUserId || !text) return NextResponse.json({ error: "Empty message." }, { status: 400 });
+  const mediaUrl = typeof body.mediaUrl === "string" ? body.mediaUrl.trim() : "";
+  const mediaType = mediaUrl && (body.mediaType === "VIDEO" ? "VIDEO" : "IMAGE");
+
+  if (!toUserId || (!text && !mediaUrl)) {
+    return NextResponse.json({ error: "Empty message." }, { status: 400 });
+  }
+  // basic guard: only allow our own blob host for media messages
+  if (mediaUrl && !/^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i.test(mediaUrl)) {
+    return NextResponse.json({ error: "Invalid media." }, { status: 400 });
+  }
 
   // only connected (mutually-accepted) users can DM
   const connected = await areConnected(user.id, toUserId);
@@ -49,7 +58,13 @@ export async function POST(request) {
   }
 
   const message = await prisma.message.create({
-    data: { conversationId: convo.id, senderId: user.id, body: text, replyToId },
+    data: {
+      conversationId: convo.id,
+      senderId: user.id,
+      body: text || (mediaType === "VIDEO" ? "📹 Video" : "📷 Photo"),
+      replyToId,
+      ...(mediaUrl && { mediaUrl, mediaType }),
+    },
   });
   await prisma.conversation.update({ where: { id: convo.id }, data: { updatedAt: new Date() } });
 
@@ -59,7 +74,9 @@ export async function POST(request) {
     await ably.channels.get(conversationChannel(convo.id)).publish("message", {
       id: message.id,
       senderId: user.id,
-      body: text,
+      body: message.body,
+      mediaUrl: message.mediaUrl || null,
+      mediaType: message.mediaType || null,
       replyToId,
       replySnippet,
       replyFromMe,

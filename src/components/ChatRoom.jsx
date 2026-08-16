@@ -3,9 +3,13 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Avatar from "./Avatar";
+import { uploadFile } from "@/lib/upload";
+
+const MAX_MEDIA_MB = 50;
 
 const REACTIONS = ["❤️","🔥","😂","😮","😢","👏"];
-const TENOR_KEY = "AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ";
+// Move this to an env var (NEXT_PUBLIC_TENOR_KEY) — see the note at the end of the chat response.
+const TENOR_KEY = process.env.NEXT_PUBLIC_TENOR_KEY || "AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ";
 
 // ---- Emoji categories ----
 const EMOJI_CATS = {
@@ -77,9 +81,12 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   const [search, setSearch] = useState("");
   const [mentioning, setMentioning] = useState(false);
   const [saveToast, setSaveToast] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState("");
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const fileRef = useRef(null);
+  const mediaRef = useRef(null);
 
   useEffect(() => {
     setStickerFavs(getFavs("oc_fav_stickers"));
@@ -142,6 +149,37 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
       if (!res.ok) { setText(msg); setReplyTo(currentReply); return; }
       setMessages((prev) => (prev.some((m) => m.id === data.message.id) ? prev : [...prev, data.message]));
     } catch { setText(msg); setReplyTo(currentReply); } finally { setSending(false); }
+  }
+
+  // ---- Media (image / video, up to 50MB) ----
+  async function sendMedia(file) {
+    if (!file || uploading) return;
+    setUploadErr("");
+    if (!/^(image|video)\//.test(file.type)) { setUploadErr("Only images or videos are supported."); return; }
+    if (file.size > MAX_MEDIA_MB * 1024 * 1024) { setUploadErr(`Max file size is ${MAX_MEDIA_MB} MB.`); return; }
+
+    setUploading(true); setPanelOpen(false);
+    const currentReply = replyTo; setReplyTo(null);
+    try {
+      const { url, kind } = await uploadFile(file);
+      const res = await fetch("/api/message", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ toUserId: other.id, mediaUrl: url, mediaType: kind, replyToId: currentReply?.id || null }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setUploadErr(data.error || "Upload failed."); setReplyTo(currentReply); return; }
+      setMessages((prev) => (prev.some((m) => m.id === data.message.id) ? prev : [...prev, data.message]));
+    } catch (e) {
+      setUploadErr(e.message || "Upload failed. Check your connection.");
+      setReplyTo(currentReply);
+    } finally {
+      setUploading(false);
+    }
+  }
+  function handleMediaPick(e) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) sendMedia(f);
   }
 
   // ---- Favorites ----
@@ -219,7 +257,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   return (
     <div className="mx-auto flex h-[100dvh] max-w-feed flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-line px-2 py-3">
+      <div className="flex items-center gap-3 border-b border-line px-2 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
         <Link href="/messages" className="text-lg text-subtle hover:text-ink">←</Link>
         <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={38} />
         <div className="min-w-0 flex-1">
@@ -259,7 +297,15 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
                       <span className="text-faint">{m.replyFromMe ? "You" : other.name}: </span>{m.replySnippet}
                     </div>
                   )}
-                  {isGif(m.body) ? (
+                  {m.mediaUrl ? (
+                    m.mediaType === "VIDEO" ? (
+                      <video src={m.mediaUrl} controls playsInline preload="metadata"
+                        className={`max-h-[320px] max-w-[240px] rounded-2xl bg-black ${mine ? "rounded-br-md" : "rounded-bl-md"}`} />
+                    ) : (
+                      <img src={m.mediaUrl} alt="" loading="lazy"
+                        className={`max-h-[320px] max-w-[240px] rounded-2xl object-cover ${mine ? "rounded-br-md" : "rounded-bl-md"}`} />
+                    )
+                  ) : isGif(m.body) ? (
                     <img src={m.body} alt="GIF" className={`max-w-[200px] rounded-2xl ${mine ? "rounded-br-md" : "rounded-bl-md"}`} />
                   ) : isCustomSticker(m.body) ? (
                     <img src={m.body} alt="Sticker" className="h-28 w-28 rounded-xl object-contain" />
@@ -442,17 +488,38 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         </div>
       )}
 
+      {/* Upload error toast */}
+      {uploadErr && (
+        <div className="mx-auto mb-1 rounded-full bg-up/15 px-3 py-1 text-center text-xs font-medium text-up">{uploadErr}</div>
+      )}
+      {uploading && (
+        <div className="mx-auto mb-1 flex items-center gap-1.5 rounded-full bg-canvas px-3 py-1 text-xs text-subtle">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-accent" /> Uploading…
+        </div>
+      )}
+
       {/* Input bar */}
-      <div className="flex items-center gap-1.5 border-t border-line bg-paper px-2 py-3">
-        <button onClick={() => openTab("emoji")} className={`rounded-full p-1.5 text-lg ${panelOpen && panelTab === "emoji" ? "text-accent" : "text-subtle"}`}>😊</button>
+      <div className="flex items-center gap-1.5 border-t border-line bg-paper px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
+        <button onClick={() => openTab("emoji")} aria-label="Emoji, stickers and GIFs"
+          className={`shrink-0 rounded-full p-1.5 text-xl leading-none ${panelOpen ? "text-accent" : "text-subtle"}`}>😊</button>
+
         <input ref={inputRef} value={text} onChange={handleInput} onKeyDown={(e) => e.key === "Enter" && sendMsg()}
           onFocus={() => setPanelOpen(false)}
-          placeholder="Message…" className="flex-1 rounded-full border border-line bg-canvas px-4 py-2 text-sm text-ink outline-none focus:border-accent" />
-        <button onClick={() => openTab("sticker")} className={`rounded-full p-1.5 ${panelOpen && panelTab === "sticker" ? "text-accent" : "text-subtle"}`}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
+          placeholder="Message…" className="min-w-0 flex-1 rounded-full border border-line bg-canvas px-4 py-2 text-[15px] text-ink outline-none focus:border-accent" />
+
+        <button onClick={() => mediaRef.current?.click()} disabled={uploading} aria-label="Share photo or video"
+          className="shrink-0 rounded-full p-1.5 text-subtle disabled:opacity-40">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <rect x="3" y="5" width="18" height="14" rx="3" />
+            <circle cx="8.5" cy="10" r="1.5" fill="currentColor" stroke="none" />
+            <path d="m21 16-5.2-5.2a1.5 1.5 0 0 0-2.12 0L5 19" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
-        <button onClick={() => openTab("gif")} className={`rounded-full px-1.5 py-1 text-[11px] font-extrabold ${panelOpen && panelTab === "gif" ? "text-accent" : "text-subtle"}`}>GIF</button>
-        <button onClick={() => sendMsg()} disabled={sending || !text.trim()} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Send</button>
+        <input ref={mediaRef} type="file" accept="image/*,video/*" onChange={handleMediaPick} className="hidden" />
+
+        {text.trim() ? (
+          <button onClick={() => sendMsg()} disabled={sending} className="shrink-0 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Send</button>
+        ) : null}
       </div>
     </div>
   );

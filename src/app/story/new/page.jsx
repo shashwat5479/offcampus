@@ -16,6 +16,9 @@ const FILTERS = [
   { name: "Drama", css: "contrast(1.3) brightness(0.95) saturate(1.2)" },
 ];
 
+// Instagram-style genre shortcuts — tapping one searches that genre instantly.
+const MUSIC_GENRES = ["Trending", "Bollywood", "Pop", "Hip-Hop", "Romantic", "Party", "Lo-fi", "Rock", "Chill", "Indie"];
+
 export default function AddStoryPage() {
   const router = useRouter();
   const [file, setFile] = useState(null);
@@ -173,6 +176,15 @@ export default function AddStoryPage() {
             <div className="mt-2 rounded-xl border border-line bg-canvas p-2">
               <input value={musicQ} onChange={(e) => searchMusic(e.target.value)} placeholder="Search songs…" autoFocus
                 className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent" />
+              {/* Genre shortcuts, like Instagram's music picker */}
+              <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {MUSIC_GENRES.map((g) => (
+                  <button key={g} onClick={() => searchMusic(g)}
+                    className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${musicQ === g ? "border-accent bg-accent text-white" : "border-line text-subtle"}`}>
+                    {g}
+                  </button>
+                ))}
+              </div>
               <div className="mt-2 max-h-48 overflow-y-auto">
                 {musicLoading && <p className="py-4 text-center text-xs text-faint">Searching…</p>}
                 {!musicLoading && musicResults.length === 0 && musicQ.trim() && <p className="py-4 text-center text-xs text-faint">No songs found.</p>}

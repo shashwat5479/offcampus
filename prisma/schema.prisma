@@ -232,6 +232,8 @@ model Message {
   createdAt      DateTime     @default(now())
   storyMediaUrl  String?
     storyMediaType  String?
+    mediaUrl     String?      // NEW — image/video sent in a DM
+    mediaType    String?      // NEW — "IMAGE" or "VIDEO"
     reactions    MessageReaction[]
     replyToId    String?
     replyTo       Message? @relation("replies", fields: [replyToId], references: [id])
