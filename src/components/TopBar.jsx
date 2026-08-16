@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
 export default function TopBar({ user, unread }) {
   const router = useRouter();
+  const pathname = usePathname();
+
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,6 +57,8 @@ export default function TopBar({ user, unread }) {
     setOpen(false);
     router.push(t ? `/search?q=${encodeURIComponent(t)}` : "/search");
   }
+
+  if (pathname.startsWith("/story/") || pathname.match(/^\/messages\/.+/)) return null;
 
   return (
     <>

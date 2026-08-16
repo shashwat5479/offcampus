@@ -93,7 +93,7 @@ export async function loadViewer(userId) {
     select: { communityId: true },
   });
   const follows = await prisma.follow.findMany({
-    where: { followerId: userId },
+    where: { followerId: userId, status: "ACCEPTED" },
     select: { followingId: true },
   });
   return {

@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Avatar from "./Avatar";
 
-const PICKER = ["😀","😂","🥹","😍","😎","🤩","😭","😅","😊","🙂","😉","😌","😴","🤔","🤗","🙌","👏","🙏","👍","👎","🔥","✨","🎉","❤️","🧡","💛","💚","💙","💜","🖤","💯","👀","😮","😢","😡","💀","🤝","💪","🫡","🫶"];
+const PICKER = [
+  "😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","😉","😊","😇","🥰","😍","🤩","😘","😗","😚","😙",
+  "😋","😛","😜","🤪","😝","🤗","🤭","🤫","🤔","🤐","😐","😶","😏","😒","🙄","😬","😌","😔","😪","🤤",
+  "😴","😷","🤒","🤕","🥴","😵","🤯","🥳","😎","🤓","🧐","🙁","😖","😞","😟","😣","😢","😭","😤","😠",
+  "😡","🤬","🥺","😳","😱","😨","😰","😥","🤠","🤡","👻","💀","👽","🤖","💩","😺","😻","🙌","👏","🙏",
+  "🤝","👍","👎","👊","✊","🤛","🤜","🤞","✌️","🤟","🤘","👌","🤌","👈","👉","👆","👇","☝️","✋","🖐️",
+  "💪","🫶","🫡","🫰","👀","🧠","🔥","✨","💫","⭐","🌟","💯","💥","💢","💦","💨","🎉","🎊","🎈","🎁",
+  "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","☕","🍕",
+];
+const STICKERS = [
+  "👋","🎉","💪","🔥","❤️","😂","🤣","👏","🙏","🤝","💯","✅","🚀","⭐","🏆","🎯","💡","📌","📢","🎵",
+  "🌈","☀️","🌙","⚡","🎮","📸","🎬","🎨","📚","💻","🛒","🎁","🧋","🍿","🎂","🌮","🍔","🍕","🍟","🧁",
+];
 const REACTIONS = ["❤️","🔥","😂","😮","😢","👏"];
+
+function fmtTime(d) {
+  if (!d) return "";
+  try { return new Date(d).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); } catch { return ""; }
+}
 
 function loadAbly() {
   if (typeof window === "undefined") return Promise.resolve(null);
@@ -13,10 +30,8 @@ function loadAbly() {
   if (!window.__ablyLoader) {
     window.__ablyLoader = new Promise((resolve, reject) => {
       const s = document.createElement("script");
-      s.src = "https://cdn.ably.com/lib/ably.min-2.js";
-      s.async = true;
-      s.onload = () => resolve(window.Ably);
-      s.onerror = () => reject(new Error("Failed to load Ably"));
+      s.src = "https://cdn.ably.com/lib/ably.min-2.js"; s.async = true;
+      s.onload = () => resolve(window.Ably); s.onerror = () => reject(new Error("Ably fail"));
       document.head.appendChild(s);
     });
   }
@@ -35,9 +50,13 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [showPicker, setShowPicker] = useState(false);
+  const [panel, setPanel] = useState(null); // null | "emoji" | "sticker" | "gif"
   const [reactFor, setReactFor] = useState(null);
-  const [replyTo, setReplyTo] = useState(null); // { id, body, mine }
+  const [replyTo, setReplyTo] = useState(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [search, setSearch] = useState("");
+  const [gifs, setGifs] = useState([]);
+  const [gifQ, setGifQ] = useState("");
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -46,36 +65,34 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
       if (cancelled || !Ably) return;
       client = new Ably.Realtime({ authUrl: "/api/ably-token" });
       channel = client.channels.get(`conversation:${conversationId}`);
-      channel.subscribe("message", (msg) => {
-        setMessages((prev) => (prev.some((m) => m.id === msg.data.id) ? prev : [...prev, msg.data]));
-      });
-      channel.subscribe("reaction", (msg) => {
-        setMessages((prev) => applyReaction(prev, msg.data));
-      });
+      channel.subscribe("message", (msg) => { setMessages((prev) => (prev.some((m) => m.id === msg.data.id) ? prev : [...prev, msg.data])); });
+      channel.subscribe("reaction", (msg) => { setMessages((prev) => applyReaction(prev, msg.data)); });
     }).catch(() => {});
     return () => { cancelled = true; if (channel) channel.unsubscribe(); if (client) client.close(); };
   }, [conversationId]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { if (!search) bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, search]);
 
-  async function send() {
-    const body = text.trim();
-    if (!body || sending) return;
-    setSending(true);
-    setText("");
-    setShowPicker(false);
-    const currentReply = replyTo;
-    setReplyTo(null);
+  const query = search.trim().toLowerCase();
+  const visible = useMemo(
+    () => (query ? messages.filter((m) => (m.body || "").toLowerCase().includes(query)) : messages),
+    [messages, query]
+  );
+
+  async function send(body) {
+    const msg = (body || text).trim();
+    if (!msg || sending) return;
+    setSending(true); setText(""); setPanel(null);
+    const currentReply = replyTo; setReplyTo(null);
     try {
       const res = await fetch("/api/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toUserId: other.id, body, replyToId: currentReply?.id || null }),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ toUserId: other.id, body: msg, replyToId: currentReply?.id || null }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) { setText(body); setReplyTo(currentReply); return; }
+      if (!res.ok) { setText(msg); setReplyTo(currentReply); return; }
       setMessages((prev) => (prev.some((m) => m.id === data.message.id) ? prev : [...prev, data.message]));
-    } catch { setText(body); setReplyTo(currentReply); } finally { setSending(false); }
+    } catch { setText(msg); setReplyTo(currentReply); } finally { setSending(false); }
   }
 
   async function react(messageId, emoji) {
@@ -86,87 +103,82 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
       const nextEmoji = mine && mine.emoji === emoji ? null : emoji;
       return applyReaction(prev, { messageId, userId: meId, emoji: nextEmoji });
     });
-    try {
-      await fetch("/api/message/react", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId, emoji }),
-      });
-    } catch {}
+    try { await fetch("/api/message/react", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messageId, emoji }) }); } catch {}
   }
 
+  async function searchGifs(q) {
+    setGifQ(q);
+    if (!q.trim()) { setGifs([]); return; }
+    try {
+      const res = await fetch(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&limit=12&media_filter=tinygif`);
+      const d = await res.json();
+      setGifs(d.results || []);
+    } catch { setGifs([]); }
+  }
+
+  function sendGif(url) { send(url); setPanel(null); setGifs([]); setGifQ(""); }
+
   return (
-    <div className="mx-auto flex h-[calc(100vh-6rem)] max-w-feed flex-col">
+    <div className="mx-auto flex h-[100dvh] max-w-feed flex-col">
       {/* header */}
-      <div className="flex items-center gap-3 border-b border-line px-1 pb-3">
+      <div className="flex items-center gap-3 border-b border-line px-1 py-3">
         <Link href="/messages" className="text-lg text-subtle hover:text-ink">←</Link>
         <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={38} />
-        <div>
-          <div className="text-sm font-semibold text-ink">{other.name}</div>
-          <div className="text-xs text-subtle">@{other.username}</div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-semibold text-ink">{other.name}</div>
+          <div className="truncate text-xs text-subtle">@{other.username}</div>
         </div>
+        <button onClick={() => { setShowSearch((s) => { if (s) setSearch(""); return !s; }); }}
+          aria-label="Search messages"
+          className={`rounded-full p-2 transition-colors hover:bg-canvas hover:text-ink ${showSearch ? "text-accent" : "text-subtle"}`}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" /><path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+        </button>
       </div>
+
+      {showSearch && (
+        <div className="flex items-center gap-2 border-b border-line bg-canvas px-3 py-2">
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search in conversation" autoFocus
+            className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-faint" />
+          {search && <button onClick={() => setSearch("")} className="text-xs text-subtle">Clear</button>}
+        </div>
+      )}
 
       {/* messages */}
       <div className="flex-1 overflow-y-auto px-1 py-4">
         <div className="flex flex-col gap-1.5">
-          {messages.map((m) => {
+          {query && visible.length === 0 && <p className="py-8 text-center text-sm text-faint">No messages match.</p>}
+          {visible.map((m) => {
             const mine = m.senderId === meId;
             const reactions = m.reactions || [];
             const emojis = [...new Set(reactions.map((r) => r.emoji))];
-
             return (
               <div key={m.id} className={`group flex items-end gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
                 {!mine && <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={26} />}
-
                 <div className={`relative flex max-w-[72%] flex-col ${mine ? "items-end" : "items-start"}`}>
-                  {/* quoted reply */}
                   {m.replySnippet && (
                     <div className={`mb-0.5 max-w-full truncate rounded-lg border-l-2 border-accent bg-canvas/60 px-2 py-1 text-[11px] text-subtle ${mine ? "self-end" : "self-start"}`}>
                       <span className="text-faint">{m.replyFromMe ? "You" : other.name}: </span>{m.replySnippet}
                     </div>
                   )}
-
-                  {m.storyMediaUrl ? (
-                    <>
-                      <span className="mb-0.5 text-[11px] text-faint">{mine ? "You replied to their story" : "Replied to your story"}</span>
-                      <div className="overflow-hidden rounded-2xl border border-line">
-                        {m.storyMediaType === "VIDEO"
-                          ? <video src={m.storyMediaUrl} muted className="h-40 w-28 object-cover" />
-                          : <img src={m.storyMediaUrl} alt="" className="h-40 w-28 object-cover" />}
-                      </div>
-                      {m.body && <div className={`mt-1 rounded-2xl px-3.5 py-2 text-sm ${mine ? "bg-accent text-accentInk" : "bg-canvas text-ink"}`}>{m.body}</div>}
-                    </>
+                  {m.body?.match(/^https?:\/\/.*\.(gif|webp)/i) ? (
+                    <img src={m.body} alt="GIF" className={`max-w-[200px] rounded-2xl ${mine ? "rounded-br-md" : "rounded-bl-md"}`} />
                   ) : (
-                    <div className={`rounded-2xl px-3.5 py-2 text-sm ${mine ? "rounded-br-md bg-accent text-accentInk" : "rounded-bl-md bg-canvas text-ink"}`}>
-                      {m.body}
-                    </div>
+                    <div className={`rounded-2xl px-3.5 py-2 text-sm ${mine ? "rounded-br-md bg-accent text-white" : "rounded-bl-md bg-canvas text-ink"}`}>{m.body}</div>
                   )}
-
-                  {/* reaction pill */}
+                  <span className="mt-0.5 px-1 text-[10px] text-faint" suppressHydrationWarning>{fmtTime(m.createdAt)}</span>
                   {emojis.length > 0 && (
-                    <div className={`-mt-1.5 ${mine ? "self-start" : "self-end"} z-10`}>
-                      <span className="rounded-full border border-line bg-paper px-1.5 py-0.5 text-xs shadow-sm">
-                        {emojis.join("")}{reactions.length > 1 ? ` ${reactions.length}` : ""}
-                      </span>
+                    <div className={`-mt-1 ${mine ? "self-start" : "self-end"} z-10`}>
+                      <span className="rounded-full border border-line bg-paper px-1.5 py-0.5 text-xs shadow-sm">{emojis.join("")}{reactions.length > 1 ? ` ${reactions.length}` : ""}</span>
                     </div>
                   )}
-
-                  {/* react + reply opener */}
                   <div className={`absolute top-1/2 -translate-y-1/2 ${mine ? "right-full mr-1" : "left-full ml-1"}`}>
                     {reactFor === m.id ? (
-                      <div className="flex items-center gap-0.5 rounded-full border border-line bg-paper px-1.5 py-1 shadow-gold">
-                        {REACTIONS.map((e) => (
-                          <button key={e} onClick={() => react(m.id, e)} className="text-base transition-transform hover:scale-125">{e}</button>
-                        ))}
+                      <div className="flex items-center gap-0.5 rounded-full border border-line bg-paper px-1.5 py-1 shadow-lg">
+                        {REACTIONS.map((e) => <button key={e} onClick={() => react(m.id, e)} className="text-base transition-transform hover:scale-125">{e}</button>)}
                         <button onClick={() => { setReplyTo({ id: m.id, body: m.body, mine }); setReactFor(null); }} className="ml-1 border-l border-line pl-1.5 text-xs text-subtle hover:text-ink">↩</button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => setReactFor(m.id)}
-                        className="text-sm text-faint opacity-0 transition-opacity hover:text-ink group-hover:opacity-100"
-                        aria-label="React or reply"
-                      >☺</button>
+                      <button onClick={() => setReactFor(m.id)} className="text-sm text-faint opacity-0 transition-opacity hover:text-ink group-hover:opacity-100" aria-label="React">☺</button>
                     )}
                   </div>
                 </div>
@@ -177,9 +189,9 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         </div>
       </div>
 
-      {/* replying-to bar */}
+      {/* reply bar */}
       {replyTo && (
-        <div className="mb-2 flex items-center gap-2 rounded-lg border border-line bg-canvas px-3 py-2 text-xs">
+        <div className="flex items-center gap-2 border-t border-line bg-canvas px-3 py-2 text-xs">
           <div className="min-w-0 flex-1">
             <div className="text-faint">Replying to {replyTo.mine ? "yourself" : other.name}</div>
             <div className="truncate text-subtle">{replyTo.body}</div>
@@ -188,26 +200,50 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         </div>
       )}
 
-      {/* emoji picker */}
-      {showPicker && (
-        <div className="mb-2 grid max-h-40 grid-cols-8 gap-1 overflow-y-auto rounded-xl border border-line bg-paper p-2">
-          {PICKER.map((e) => (
-            <button key={e} onClick={() => setText((t) => t + e)} className="rounded p-1 text-xl hover:bg-canvas">{e}</button>
-          ))}
+      {/* panels: emoji / sticker / gif */}
+      {panel === "emoji" && (
+        <div className="max-h-44 overflow-y-auto border-t border-line bg-paper p-2">
+          <div className="grid grid-cols-8 gap-1">
+            {PICKER.map((e, i) => <button key={`${e}-${i}`} onClick={() => setText((t) => t + e)} className="rounded p-1 text-xl hover:bg-canvas">{e}</button>)}
+          </div>
+        </div>
+      )}
+      {panel === "sticker" && (
+        <div className="max-h-44 overflow-y-auto border-t border-line bg-paper p-2">
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-faint">Stickers</div>
+          <div className="grid grid-cols-5 gap-2">
+            {STICKERS.map((s, i) => <button key={`s-${i}`} onClick={() => send(s)} className="rounded-xl bg-canvas p-3 text-3xl transition-transform hover:scale-110">{s}</button>)}
+          </div>
+        </div>
+      )}
+      {panel === "gif" && (
+        <div className="max-h-52 overflow-y-auto border-t border-line bg-paper p-2">
+          <input value={gifQ} onChange={(e) => searchGifs(e.target.value)} placeholder="Search GIFs…" autoFocus
+            className="mb-2 w-full rounded-full border border-line bg-canvas px-3 py-1.5 text-sm text-ink outline-none placeholder:text-faint" />
+          {gifs.length > 0 ? (
+            <div className="grid grid-cols-3 gap-1">
+              {gifs.map((g) => (
+                <button key={g.id} onClick={() => sendGif(g.media_formats?.tinygif?.url || g.media_formats?.gif?.url)} className="overflow-hidden rounded-lg">
+                  <img src={g.media_formats?.tinygif?.url || g.media_formats?.gif?.url} alt="" className="h-20 w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          ) : gifQ.trim() ? <p className="py-4 text-center text-xs text-faint">No GIFs found.</p> : <p className="py-4 text-center text-xs text-faint">Type to search GIFs</p>}
         </div>
       )}
 
-      {/* input */}
-      <div className="flex items-center gap-2 border-t border-line pt-3">
-        <button onClick={() => setShowPicker((s) => !s)} className="text-xl" aria-label="Emoji">😊</button>
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && send()}
-          placeholder="Message…"
-          className="flex-1 rounded-full border border-line bg-canvas px-4 py-2 text-sm text-ink outline-none focus:border-accent"
-        />
-        <button onClick={send} disabled={sending || !text.trim()} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accentInk disabled:opacity-50">Send</button>
+      {/* input — pinned to bottom */}
+      <div className="flex items-center gap-2 border-t border-line bg-paper px-3 py-3">
+        <div className="flex gap-1">
+          <button onClick={() => setPanel((p) => p === "emoji" ? null : "emoji")} className={`rounded-full p-1.5 text-lg ${panel === "emoji" ? "text-accent" : "text-subtle"}`}>😊</button>
+          <button onClick={() => setPanel((p) => p === "sticker" ? null : "sticker")} className={`rounded-full p-1.5 ${panel === "sticker" ? "text-accent" : "text-subtle"}`}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
+          </button>
+          <button onClick={() => setPanel((p) => p === "gif" ? null : "gif")} className={`rounded-full p-1.5 text-xs font-bold ${panel === "gif" ? "text-accent" : "text-subtle"}`}>GIF</button>
+        </div>
+        <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()}
+          placeholder="Message…" className="flex-1 rounded-full border border-line bg-canvas px-4 py-2 text-sm text-ink outline-none focus:border-accent" />
+        <button onClick={() => send()} disabled={sending || !text.trim()} className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Send</button>
       </div>
     </div>
   );
