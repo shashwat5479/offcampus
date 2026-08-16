@@ -246,6 +246,10 @@ model Story {
   author    User     @relation("authorStories", fields: [authorId], references: [id], onDelete: Cascade)
   mediaUrl  String
   type      String   @default("IMAGE")
+  caption   String?
+  filter    String?
+  musicUrl  String?
+  musicTitle String?
   createdAt DateTime @default(now())
   expiresAt DateTime
   reactions StoryReaction[]

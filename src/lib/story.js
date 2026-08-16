@@ -2,13 +2,17 @@ import { prisma } from "@/lib/db";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export async function createStory({ authorId, mediaUrl, type }) {
+export async function createStory({ authorId, mediaUrl, type, caption, filter, musicUrl, musicTitle }) {
   return prisma.story.create({
     data: {
       authorId,
       mediaUrl,
       type: type === "VIDEO" ? "VIDEO" : "IMAGE",
       expiresAt: new Date(Date.now() + DAY_MS),
+      ...(caption && { caption }),
+      ...(filter && { filter }),
+      ...(musicUrl && { musicUrl }),
+      ...(musicTitle && { musicTitle }),
     },
   });
 }
@@ -73,6 +77,10 @@ export async function getUserActiveStories(viewerId, username) {
       id: true,
       mediaUrl: true,
       type: true,
+      caption: true,
+      filter: true,
+      musicUrl: true,
+      musicTitle: true,
       reactions: { where: { userId: viewerId }, select: { emoji: true } },
     },
   });
@@ -81,6 +89,10 @@ export async function getUserActiveStories(viewerId, username) {
     mediaUrl: s.mediaUrl,
     type: s.type,
     myReaction: s.reactions[0]?.emoji || null,
+    caption: s.caption || null,
+    filter: s.filter || null,
+    musicUrl: s.musicUrl || null,
+    musicTitle: s.musicTitle || null,
   }));
   return { author: target, stories: mapped, locked: false };
   

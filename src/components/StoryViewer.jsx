@@ -20,6 +20,7 @@ export default function StoryViewer({ author, stories, isOwner }) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const timer = useRef(null);
+  const audioRef = useRef(null);
   const cur = stories[i];
 
   function close() { router.push("/"); }
@@ -28,6 +29,17 @@ export default function StoryViewer({ author, stories, isOwner }) {
 
   useEffect(() => {
     setProgress(0);
+    // play music if story has it
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    if (cur?.musicUrl) {
+      const a = new Audio(cur.musicUrl); a.volume = 0.6;
+      a.play().catch(() => {});
+      audioRef.current = a;
+    }
+    return () => { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; } };
+  }, [i]);
+
+  useEffect(() => {
     if (!cur || cur.type === "VIDEO" || paused) return;
     const DURATION = 5000;
     const start = Date.now();
@@ -106,9 +118,22 @@ export default function StoryViewer({ author, stories, isOwner }) {
         <button onClick={close} className="absolute right-3 top-5 z-10 text-2xl leading-none text-white/90">×</button>
 
         {cur.type === "VIDEO" ? (
-          <video key={cur.id} src={cur.mediaUrl} autoPlay onEnded={next} className="h-full w-full object-contain" />
+          <video key={cur.id} src={cur.mediaUrl} autoPlay onEnded={next} className="h-full w-full object-contain" style={cur.filter ? { filter: {"Warm":"sepia(0.35) saturate(1.3)","Cool":"saturate(0.8) hue-rotate(15deg) brightness(1.05)","B&W":"grayscale(1)","Vintage":"sepia(0.5) contrast(0.9) brightness(1.1)","Vivid":"saturate(1.6) contrast(1.1)","Fade":"brightness(1.15) contrast(0.85) saturate(0.7)","Drama":"contrast(1.3) brightness(0.95) saturate(1.2)"}[cur.filter] || undefined } : undefined} />
         ) : (
-          <img key={cur.id} src={cur.mediaUrl} alt="" className="h-full w-full object-contain" />
+          <img key={cur.id} src={cur.mediaUrl} alt="" className="h-full w-full object-contain" style={cur.filter ? { filter: {"Warm":"sepia(0.35) saturate(1.3)","Cool":"saturate(0.8) hue-rotate(15deg) brightness(1.05)","B&W":"grayscale(1)","Vintage":"sepia(0.5) contrast(0.9) brightness(1.1)","Vivid":"saturate(1.6) contrast(1.1)","Fade":"brightness(1.15) contrast(0.85) saturate(0.7)","Drama":"contrast(1.3) brightness(0.95) saturate(1.2)"}[cur.filter] || undefined } : undefined} />
+        )}
+
+
+        {cur.caption && (
+          <div className="absolute inset-x-0 bottom-20 z-10 bg-gradient-to-t from-black/70 to-transparent px-4 pb-3 pt-8">
+            <p className="text-sm font-medium text-white drop-shadow-lg">{cur.caption}</p>
+          </div>
+        )}
+        {cur.musicTitle && (
+          <div className="absolute left-3 bottom-20 z-10 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1 backdrop-blur">
+            <span className="animate-spin text-xs" style={{animationDuration:"3s"}}>🎵</span>
+            <span className="max-w-[140px] truncate text-[11px] text-white">{cur.musicTitle}</span>
+          </div>
         )}
 
         <button onClick={prev} className="absolute left-0 top-0 z-0 h-[calc(100%-8rem)] w-1/3" aria-label="Previous" />
@@ -155,7 +180,7 @@ export default function StoryViewer({ author, stories, isOwner }) {
               <button
                 onClick={sendReply}
                 disabled={!reply.trim() || sending}
-                className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accentInk disabled:opacity-50"
+                className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {sent ? "Sent ✓" : "Send"}
               </button>
