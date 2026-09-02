@@ -1,0 +1,407 @@
+// OffCampus — schema (SQLite/Postgres compatible via provider swap).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  username     String  @unique
+  passwordHash String
+  name         String
+  branch       String?
+  year         Int?
+  bio          String?
+  avatarUrl    String?
+  storyReactions StoryReaction[]
+  collegeId String?
+  college   College? @relation(fields: [collegeId], references: [id])
+  opportunitiesPosted  Opportunity[]  @relation("opportunitiesPosted")
+  myApplications       OpportunityApplication[]  @relation("myApplications")
+  posts        Post[]
+  comments     Comment[]
+  postVotes    PostVote[]
+  commentVotes CommentVote[]
+  memberships  Membership[]
+  following    Follow[]      @relation("follower")
+  followers    Follow[]      @relation("following")
+  stories      Story[]       @relation("authorStories")
+  notifications      Notification[] @relation("recipient")
+  actedNotifications Notification[] @relation("actor")
+  Conversational1    Conversation[] @relation("conv1")
+  Conversational2    Conversation[] @relation("conv2")
+  messages           Message[]        @relation("sender")
+  notifyFollow       Boolean        @default(true)
+  notifyComment      Boolean        @default(true)
+  notifyReply        Boolean        @default(true)
+  notifyVote         Boolean        @default(true)
+  isPrivate          Boolean        @default(false)
+  notifyMessage      Boolean        @default(true)
+  confessions        Confession[]   @relation("confessions")
+   confessionVotes    ConfessionVote[]
+   accounts       Account[]
+    sessions      Session[]
+  ConfessionReports  ConfessionReport[]
+  confessionComments   ConfessionComment[]   @relation("confessionComments")
+    messageReactions  MessageReaction[]
+  createdAt DateTime @default(now())
+
+  @@index([collegeId])
+}
+
+model College {
+  id   String  @id @default(cuid())
+  code String  @unique
+  name String
+  city String?
+
+  users       User[]
+  communities Community[]
+}
+
+model Community {
+  id          String   @id @default(cuid())
+  collegeId   String?
+  college     College? @relation(fields: [collegeId], references: [id])
+  type        String
+  name        String
+  slug        String   @unique
+  description String?
+  isPublic    Boolean  @default(false)
+  category    String?
+
+  posts   Post[]
+  members Membership[]
+
+  createdAt DateTime @default(now())
+
+  @@index([collegeId])
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  communityId String?
+  community   Community?  @relation(fields: [communityId], references: [id])
+  role        String    @default("MEMBER")
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, communityId])
+  @@index([communityId])
+  @@index([userId])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id])
+
+  type    String  @default("TEXT")
+  title   String
+  body    String?
+  linkUrl String?
+
+  score Int @default(0)
+
+  comments Comment[]
+  votes    PostVote[]
+  tags     PostTag[]
+
+  createdAt DateTime @default(now())
+
+  @@index([communityId, createdAt])
+  @@index([authorId, createdAt])
+}
+
+model Comment {
+  id       String    @id @default(cuid())
+  postId   String
+  post     Post      @relation(fields: [postId], references: [id])
+  authorId String
+  author   User      @relation(fields: [authorId], references: [id])
+  parentId String?
+  parent   Comment?  @relation("replies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("replies")
+  body     String
+  score    Int       @default(0)
+
+  votes CommentVote[]
+
+  createdAt DateTime @default(now())
+
+  @@index([postId, createdAt])
+  @@index([parentId])
+}
+
+model PostVote {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+  value  Int
+
+  @@unique([userId, postId])
+  @@index([postId])
+}
+
+model CommentVote {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id])
+  value     Int
+
+  @@unique([userId, commentId])
+  @@index([commentId])
+}
+
+model PostTag {
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+  tag    String
+
+  @@id([postId, tag])
+  @@index([tag])
+}
+
+model Follow {
+  id          String @id @default(cuid())
+  followerId  String
+  follower    User   @relation("follower", fields: [followerId], references: [id])
+  followingId String
+  following   User   @relation("following", fields: [followingId], references: [id])
+  status      String @default("ACCEPTED")
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+  @@index([followerId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("recipient", fields: [userId], references: [id])
+  actorId   String
+  actor     User     @relation("actor", fields: [actorId], references: [id])
+  type      String
+  postId    String?
+  commentId String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  user1Id   String
+  user1     User      @relation("conv1", fields: [user1Id], references: [id])
+  user2Id   String
+  user2     User      @relation("conv2", fields: [user2Id], references: [id])
+  messages  Message[]
+  user1ClearedAt DateTime?
+  user2ClearedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation("sender", fields: [senderId], references: [id])
+  body           String
+  readAt         DateTime?
+  deletedAt      DateTime?
+  createdAt      DateTime     @default(now())
+  storyMediaUrl  String?
+    storyMediaType  String?
+    mediaUrl     String?      // NEW — image/video sent in a DM
+    mediaType    String?      // NEW — "IMAGE" or "VIDEO"
+    reactions    MessageReaction[]
+    replyToId    String?
+    replyTo       Message? @relation("replies", fields: [replyToId], references: [id])
+    repliesTo     Message[] @relation("replies")
+  
+
+  @@index([conversationId, createdAt])
+}
+model Story {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation("authorStories", fields: [authorId], references: [id], onDelete: Cascade)
+  mediaUrl  String
+  type      String   @default("IMAGE")
+  caption   String?
+  filter    String?
+  musicUrl  String?
+  musicTitle String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  reactions StoryReaction[]
+  @@index([authorId])
+  @@index([expiresAt])
+}
+model StoryReaction {
+  id        String   @id @default(cuid())
+  storyId   String
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([storyId, userId])
+  @@index([storyId])
+}
+model Opportunity {
+  id          String   @id @default(cuid())
+  postedById  String
+  postedBy    User     @relation("opportunitiesPosted", fields: [postedById], references: [id], onDelete: Cascade)
+  company     String
+  role        String
+  type        String   @default("Placement") // Placement | Internship | Hackathon
+  description String?
+  location    String?
+  isRemote    Boolean  @default(false)
+  branches    String?  // comma-separated, e.g. "CSE,IT,ECE" (blank = all)
+  batchYear   Int?
+  stipend     String?  // free text: "12 LPA" / "25k/mo"
+  applyUrl    String
+  deadline    DateTime?
+  createdAt   DateTime @default(now())
+
+  applications OpportunityApplication[]
+
+  @@index([type])
+  @@index([deadline])
+}
+
+model OpportunityApplication {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation("myApplications", fields: [userId], references: [id], onDelete: Cascade)
+  status        String      @default("SAVED") // SAVED | APPLIED | INTERVIEWING | OFFER | REJECTED
+  updatedAt     DateTime    @updatedAt
+  createdAt     DateTime    @default(now())
+
+  @@unique([opportunityId, userId])
+  @@index([userId])
+}
+model Confession {
+  id         String   @id @default(cuid())
+  authorId   String   // stored for moderation, NEVER sent to the client
+  author     User     @relation("confessions", fields: [authorId], references: [id], onDelete: Cascade)
+  body       String
+  isPublic   Boolean  @default(false) // false = my college only, true = all colleges
+  collegeId  String?  // captured at post time for college-scoped visibility
+  score      Int      @default(0)
+  reportCount Int     @default(0)
+  hidden     Boolean  @default(false) // auto-hidden after enough reports
+  createdAt  DateTime @default(now())
+  reports    ConfessionReport[]
+  votes ConfessionVote[]
+  comments  ConfessionComment[]
+  @@index([isPublic, createdAt])
+  @@index([collegeId, createdAt])
+}
+
+model ConfessionVote {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  confessionId String
+  confession   Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  value        Int
+
+  @@unique([userId, confessionId])
+  @@index([confessionId])
+}
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+model ConfessionReport {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  confessionId String
+  confession   Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, confessionId])
+  @@index([confessionId])
+}
+model ConfessionComment {
+  id           String     @id @default(cuid())
+  confessionId String
+  confession   Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+  authorId     String     // stored for moderation, NEVER sent to the client
+  author       User       @relation("confessionComments", fields: [authorId], references: [id], onDelete: Cascade)
+  body         String
+  createdAt    DateTime   @default(now())
+
+  @@index([confessionId, createdAt])
+}
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+}

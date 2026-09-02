@@ -1,0 +1,54 @@
+import { redirect, notFound } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import ChatRoom from "@/components/ChatRoom";
+
+export const dynamic = "force-dynamic";
+
+export default async function ConversationPage({ params }) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const convo = await prisma.conversation.findUnique({
+    where: { id: params.id },
+    include: { user1: true, user2: true },
+  });
+  if (!convo) notFound();
+  if (convo.user1Id !== user.id && convo.user2Id !== user.id) notFound();
+
+  const other = convo.user1Id === user.id ? convo.user2 : convo.user1;
+  const clearedAt = convo.user1Id === user.id ? convo.user1ClearedAt : convo.user2ClearedAt;
+
+  const messages = await prisma.message.findMany({
+    where: { conversationId: convo.id, ...(clearedAt && { createdAt: { gt: clearedAt } }) },
+    orderBy: { createdAt: "asc" },
+    take: 100,
+    include: {
+      reactions: { select: { emoji: true, userId: true } },
+      replyTo: { select: { body: true, senderId: true } },
+    },
+  });
+
+  return (
+    <ChatRoom
+      conversationId={convo.id}
+      meId={user.id}
+      other={{ id: other.id, name: other.name, username: other.username, avatarUrl: other.avatarUrl }}
+      initialMessages={messages.map((m) => ({
+        id: m.id,
+        senderId: m.senderId,
+        body: m.body,
+        mediaUrl: m.mediaUrl || null,
+        mediaType: m.mediaType || null,
+        storyMediaUrl: m.storyMediaUrl || null,
+        storyMediaType: m.storyMediaType || null,
+        deletedAt: m.deletedAt || null,
+        reactions: m.reactions,
+        replyToId: m.replyToId,
+        replySnippet: m.replyTo?.body?.slice(0, 80) || null,
+        replyFromMe: m.replyTo ? m.replyTo.senderId === user.id : null,
+        createdAt: m.createdAt,
+      }))}
+    />
+  );
+}
