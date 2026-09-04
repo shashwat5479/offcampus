@@ -100,6 +100,20 @@ export default function StoryViewer({ author, stories, isOwner }) {
     } catch {}
   }
 
+  async function deleteStory() {
+    if (!confirm("Delete this story? This can't be undone.")) return;
+    try {
+      const res = await fetch(`/api/story?id=${cur.id}`, { method: "DELETE" });
+      if (res.ok) {
+        if (stories.length <= 1) { close(); }
+        else { window.location.reload(); }
+      } else {
+        const d = await res.json().catch(() => ({}));
+        alert(d.error || "Couldn't delete.");
+      }
+    } catch {}
+  }
+
   async function sendReply() {
     const text = reply.trim();
     if (!text || sending) return;
@@ -176,6 +190,17 @@ export default function StoryViewer({ author, stories, isOwner }) {
           <div key={burst.k} className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
             <span className="animate-[floatUp_0.9s_ease-out_forwards] text-7xl">{burst.e}</span>
           </div>
+        )}
+
+        {isOwner && (
+          <button
+            onClick={deleteStory}
+            className="absolute right-3 top-12 z-30 rounded-full bg-black/40 p-2 text-white/90 backdrop-blur"
+            style={{ top: "calc(3rem + env(safe-area-inset-top))" }}
+            aria-label="Delete story"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </button>
         )}
 
         {isOwner ? (

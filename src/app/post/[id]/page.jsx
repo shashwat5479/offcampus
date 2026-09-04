@@ -57,7 +57,7 @@ export default async function PostPage({ params }) {
         ← Back to feed
       </Link>
 
-      <PostCard post={post} dir={myPostVote?.value || 0} />
+      <PostCard post={post} dir={myPostVote?.value || 0} viewerId={user.id} />
 
       <div className="mt-3 rounded-xl2 border border-line bg-paper p-4">
         <div className="mb-4">

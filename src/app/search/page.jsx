@@ -111,7 +111,7 @@ export default async function SearchPage({ searchParams }) {
       )}
 
       <div className="flex flex-col gap-3">
-        {posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} />)}
+        {posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} viewerId={user.id} />)}
       </div>
 
       {nothing && (

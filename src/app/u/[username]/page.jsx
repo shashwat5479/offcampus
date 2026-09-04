@@ -116,7 +116,7 @@ if (!isMe) {
         {posts.length === 0 ? (
           <p className="rounded-xl2 border border-line bg-paper p-8 text-center text-sm text-subtle">No posts yet.</p>
         ) : (
-          posts.map((post) => <PostCard key={post.id} post={post} dir={dirByPost[post.id] || 0} />)
+          posts.map((post) => <PostCard key={post.id} post={post} dir={dirByPost[post.id] || 0} viewerId={me.id} />)
         )}
       </div>
     </div>

@@ -52,16 +52,51 @@ export async function POST(request) {
       authorId: user.id,
       communityId: communityId || null,
       type,
-            title,
-            body: text || null,
+      title,
+      body: text || null,
       linkUrl,
       score: 1,
       tags: { create: tags.map((tag) => ({ tag })) },
     },
   });
 
-  // author implicitly upvotes their own post
   await prisma.postVote.create({ data: { userId: user.id, postId: post.id, value: 1 } });
 
   return NextResponse.json({ ok: true, id: post.id });
+}
+
+// Delete a post you own. Post's children (comments, votes, tags) do NOT cascade
+// in the schema, so we remove them explicitly inside a transaction.
+export async function DELETE(request) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Not logged in." }, { status: 401 });
+
+  const { searchParams } = new URL(request.url);
+  let postId = searchParams.get("id");
+  if (!postId) {
+    const body = await request.json().catch(() => ({}));
+    postId = body.postId;
+  }
+  if (!postId) return NextResponse.json({ error: "Missing post id." }, { status: 400 });
+
+  const post = await prisma.post.findUnique({ where: { id: postId }, select: { authorId: true } });
+  if (!post) return NextResponse.json({ error: "Post not found." }, { status: 404 });
+  if (post.authorId !== user.id) {
+    return NextResponse.json({ error: "You can only delete your own posts." }, { status: 403 });
+  }
+
+  // Order matters: comment-votes -> reply comments -> top-level comments -> post rows.
+  const commentIds = (await prisma.comment.findMany({ where: { postId }, select: { id: true } })).map((c) => c.id);
+
+  await prisma.$transaction([
+    prisma.commentVote.deleteMany({ where: { commentId: { in: commentIds } } }),
+    prisma.comment.deleteMany({ where: { postId, parentId: { not: null } } }), // replies first
+    prisma.comment.deleteMany({ where: { postId } }),                          // then top-level
+    prisma.postVote.deleteMany({ where: { postId } }),
+    prisma.postTag.deleteMany({ where: { postId } }),
+    prisma.notification.deleteMany({ where: { postId } }),
+    prisma.post.delete({ where: { id: postId } }),
+  ]);
+
+  return NextResponse.json({ ok: true });
 }

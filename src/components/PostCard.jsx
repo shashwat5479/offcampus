@@ -1,12 +1,14 @@
 import Link from "next/link";
 import VoteButtons from "./VoteButtons";
 import ShareButton from "./ShareButton";
+import PostMenu from "./PostMenu";
 import { timeAgo } from "@/lib/format";
 
-export default function PostCard({ post, dir = 0 }) {
+export default function PostCard({ post, dir = 0, viewerId }) {
   const college = post.community?.college;
   const commentCount = post._count?.comments ?? 0;
   const tags = post.tags?.map((t) => t.tag) ?? [];
+  const isOwner = viewerId && post.author?.id === viewerId;
 
   return (
     <article className="flex gap-3 rounded-xl2 border border-line bg-paper p-4 transition-colors hover:border-faint">
@@ -27,6 +29,7 @@ export default function PostCard({ post, dir = 0 }) {
           </Link>
           <span className="text-faint">• {timeAgo(post.createdAt)}</span>
           <span className="ml-1 rounded bg-canvas px-1.5 py-0.5 text-[10px] font-medium text-faint">{post.type}</span>
+          {isOwner && <span className="ml-auto"><PostMenu postId={post.id} /></span>}
         </div>
 
         <Link href={`/post/${post.id}`} className="block">

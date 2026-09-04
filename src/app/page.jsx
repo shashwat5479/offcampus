@@ -74,7 +74,7 @@ export default async function HomePage({ searchParams }) {
           </p>
         ) : (
           <FeedList>
-            {posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} />)}
+            {posts.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} viewerId={user.id} />)}
           </FeedList>
         )}
       </div>

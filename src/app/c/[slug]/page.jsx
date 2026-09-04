@@ -66,7 +66,7 @@ export default async function CommunityPage({ params, searchParams }) {
               No posts yet. <a href={`/submit?community=${community.slug}`} className="text-accent">Be the first.</a>
             </p>
           ) : (
-            ranked.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} />)
+            ranked.map((post) => <PostCard key={post.id} post={post} dir={viewer.votesByPost[post.id] || 0} viewerId={user.id} />)
           )}
         </div>
 
