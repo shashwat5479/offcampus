@@ -331,7 +331,16 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-2 py-4">
         <div className="flex flex-col gap-1">
-          {messages.length === 0 && <p className="py-10 text-center text-sm text-faint">No messages here yet.</p>}
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={96} />
+              <div>
+                <div className="text-lg font-semibold text-ink">{other.name}</div>
+                <div className="text-sm text-subtle">@{other.username} · OffCampus</div>
+              </div>
+              <Link href={`/u/${other.username}`} className="rounded-lg bg-canvas px-4 py-1.5 text-sm font-semibold text-ink hover:bg-line">View Profile</Link>
+            </div>
+          )}
           {query && visible.length === 0 && <p className="py-8 text-center text-sm text-faint">No messages match.</p>}
           {visible.map((m) => {
             const mine = m.senderId === meId;
@@ -571,28 +580,38 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         </div>
       )}
 
-      {/* Input bar */}
-      <div className="flex items-center gap-1.5 border-t border-line bg-paper px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
-        <button onClick={() => openTab("emoji")} aria-label="Emoji, stickers and GIFs"
-          className={`shrink-0 rounded-full p-1.5 text-xl leading-none ${panelOpen ? "text-accent" : "text-subtle"}`}>😊</button>
+      {/* Input bar — Instagram-style pill */}
+      <div className="border-t border-line bg-paper px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3">
+        <div className="flex items-center gap-2 rounded-full border border-line bg-canvas px-2 py-1.5">
+          <button onClick={() => openTab("emoji")} aria-label="Emoji, stickers and GIFs"
+            className={`shrink-0 rounded-full p-1 text-xl leading-none ${panelOpen ? "text-accent" : "text-subtle"}`}>😊</button>
 
-        <input ref={inputRef} value={text} onChange={handleInput} onKeyDown={(e) => e.key === "Enter" && sendMsg()}
-          onFocus={() => setPanelOpen(false)}
-          placeholder="Message…" className="min-w-0 flex-1 rounded-full border border-line bg-canvas px-4 py-2.5 text-[15px] text-ink outline-none focus:border-accent" />
+          <input ref={inputRef} value={text} onChange={handleInput} onKeyDown={(e) => e.key === "Enter" && sendMsg()}
+            onFocus={() => setPanelOpen(false)}
+            placeholder="Message…" className="min-w-0 flex-1 bg-transparent px-1 text-[15px] text-ink outline-none placeholder:text-faint" />
 
-        <button onClick={() => mediaRef.current?.click()} disabled={uploading} aria-label="Share photo or video"
-          className="shrink-0 rounded-full p-1.5 text-subtle disabled:opacity-40">
-          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <rect x="3" y="5" width="18" height="14" rx="3" />
-            <circle cx="8.5" cy="10" r="1.5" fill="currentColor" stroke="none" />
-            <path d="m21 16-5.2-5.2a1.5 1.5 0 0 0-2.12 0L5 19" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <input ref={mediaRef} type="file" accept="image/*,video/*" onChange={handleMediaPick} className="hidden" />
+          {!text.trim() && (
+            <>
+              <button onClick={() => mediaRef.current?.click()} disabled={uploading} aria-label="Share photo or video"
+                className="shrink-0 rounded-full p-1 text-subtle disabled:opacity-40">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <rect x="3" y="5" width="18" height="14" rx="3" />
+                  <circle cx="8.5" cy="10" r="1.5" fill="currentColor" stroke="none" />
+                  <path d="m21 16-5.2-5.2a1.5 1.5 0 0 0-2.12 0L5 19" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <button onClick={() => openTab("sticker")} aria-label="Stickers"
+                className={`shrink-0 rounded-full p-1 ${panelOpen && panelTab === "sticker" ? "text-accent" : "text-subtle"}`}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
+              </button>
+            </>
+          )}
+          <input ref={mediaRef} type="file" accept="image/*,video/*" onChange={handleMediaPick} className="hidden" />
 
-        {text.trim() ? (
-          <button onClick={() => sendMsg()} disabled={sending} className="shrink-0 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Send</button>
-        ) : null}
+          {text.trim() ? (
+            <button onClick={() => sendMsg()} disabled={sending} className="shrink-0 rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50">Send</button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,28 @@
+[
+  { "id": "trend1", "title": "Aesthetic Vibe",   "artist": "Wave",     "mood": "Trending",  "url": "/music/trend1.mp3" },
+  { "id": "trend2", "title": "Golden Hour",      "artist": "Sol",      "mood": "Trending",  "url": "/music/trend2.mp3" },
+  { "id": "trend3", "title": "Summer Walk",      "artist": "Olexy",    "mood": "Trending",  "url": "/music/trend3.mp3" },
+  { "id": "trend4", "title": "Feel Good",        "artist": "FAS",      "mood": "Trending",  "url": "/music/trend4.mp3" },
+
+  { "id": "chill1", "title": "Lofi Chill",       "artist": "Ambient",  "mood": "Chill",     "url": "/music/chill1.mp3" },
+  { "id": "chill2", "title": "Good Night",       "artist": "FAS",      "mood": "Chill",     "url": "/music/chill2.mp3" },
+  { "id": "chill3", "title": "Coffee Morning",   "artist": "Ashot",    "mood": "Chill",     "url": "/music/chill3.mp3" },
+  { "id": "chill4", "title": "Rainy Day",        "artist": "Keys",     "mood": "Chill",     "url": "/music/chill4.mp3" },
+
+  { "id": "hype1",  "title": "Energy Rise",      "artist": "Coma",     "mood": "Hype",      "url": "/music/hype1.mp3" },
+  { "id": "hype2",  "title": "Powerful Beat",    "artist": "Qube",     "mood": "Hype",      "url": "/music/hype2.mp3" },
+  { "id": "hype3",  "title": "Sport Rock",       "artist": "Alex",     "mood": "Hype",      "url": "/music/hype3.mp3" },
+  { "id": "hype4",  "title": "Adrenaline",       "artist": "Beat",     "mood": "Hype",      "url": "/music/hype4.mp3" },
+
+  { "id": "rom1",   "title": "Soft Piano",       "artist": "Lesfm",    "mood": "Romantic",  "url": "/music/rom1.mp3" },
+  { "id": "rom2",   "title": "Beautiful Dream",  "artist": "Music",    "mood": "Romantic",  "url": "/music/rom2.mp3" },
+  { "id": "rom3",   "title": "First Love",       "artist": "Keys",     "mood": "Romantic",  "url": "/music/rom3.mp3" },
+
+  { "id": "party1", "title": "Dance Floor",      "artist": "Groove",   "mood": "Party",     "url": "/music/party1.mp3" },
+  { "id": "party2", "title": "Funky Groove",     "artist": "Qube",     "mood": "Party",     "url": "/music/party2.mp3" },
+  { "id": "party3", "title": "Night Out",        "artist": "Grand",    "mood": "Party",     "url": "/music/party3.mp3" },
+
+  { "id": "emo1",   "title": "Cinematic Feels",  "artist": "Strings",  "mood": "Emotional", "url": "/music/emo1.mp3" },
+  { "id": "emo2",   "title": "Sad Piano",        "artist": "Ashot",    "mood": "Emotional", "url": "/music/emo2.mp3" },
+  { "id": "emo3",   "title": "Nostalgia",        "artist": "Lesfm",    "mood": "Emotional", "url": "/music/emo3.mp3" }
+]
