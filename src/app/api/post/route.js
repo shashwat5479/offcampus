@@ -100,3 +100,41 @@ export async function DELETE(request) {
 
   return NextResponse.json({ ok: true });
 }
+
+// Edit a post you own. Only title, body, and tags are editable (not media/community,
+// to keep it simple and avoid re-deriving type). Tags are fully replaced.
+export async function PATCH(request) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Not logged in." }, { status: 401 });
+
+  const body = await request.json().catch(() => ({}));
+  const postId = body.postId;
+  const title = (body.title || "").trim();
+  const text = (body.body || "").trim();
+  if (!postId) return NextResponse.json({ error: "Missing post id." }, { status: 400 });
+  if (!title) return NextResponse.json({ error: "Give your post a title." }, { status: 400 });
+
+  const post = await prisma.post.findUnique({ where: { id: postId }, select: { authorId: true } });
+  if (!post) return NextResponse.json({ error: "Post not found." }, { status: 404 });
+  if (post.authorId !== user.id) {
+    return NextResponse.json({ error: "You can only edit your own posts." }, { status: 403 });
+  }
+
+  const tags = Array.from(new Set(
+    (body.tags || "").split(",").map((s) => s.trim().toLowerCase().replace(/^#/, "")).filter(Boolean).slice(0, 6)
+  ));
+
+  await prisma.$transaction([
+    prisma.postTag.deleteMany({ where: { postId } }),
+    prisma.post.update({
+      where: { id: postId },
+      data: {
+        title,
+        body: text || null,
+        tags: { create: tags.map((tag) => ({ tag })) },
+      },
+    }),
+  ]);
+
+  return NextResponse.json({ ok: true, id: postId });
+}

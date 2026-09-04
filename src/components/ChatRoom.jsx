@@ -287,7 +287,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   const isCustomSticker = (b) => b?.startsWith("data:image/");
 
   return (
-    <div className="mx-auto flex h-[100dvh] max-w-feed flex-col">
+    <div className="mx-auto flex h-[100dvh] w-full max-w-2xl flex-col bg-canvas">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-line px-2 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
         <Link href="/messages" className="text-lg text-subtle hover:text-ink">←</Link>
@@ -330,7 +330,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-2 py-4">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1">
           {messages.length === 0 && <p className="py-10 text-center text-sm text-faint">No messages here yet.</p>}
           {query && visible.length === 0 && <p className="py-8 text-center text-sm text-faint">No messages match.</p>}
           {visible.map((m) => {
@@ -380,7 +380,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
                   ) : isSingleEmoji(m.body) ? (
                     <span className="text-5xl">{m.body}</span>
                   ) : (
-                    <div className={`rounded-2xl px-3.5 py-2 text-sm ${mine ? "rounded-br-md bg-accent text-white" : "rounded-bl-md bg-canvas text-ink"}`}>{m.body}</div>
+                    <div className={`rounded-2xl px-3.5 py-2 text-sm ${mine ? "rounded-br-[4px] bg-gradient-to-br from-[#5B51D8] via-[#833AB4] to-[#C13584] text-white" : "rounded-bl-[4px] bg-canvas text-ink"}`}>{m.body}</div>
                   )}
 
                   <span className="mt-0.5 px-1 text-[10px] text-faint" suppressHydrationWarning>{fmtTime(m.createdAt)}</span>
@@ -578,7 +578,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
 
         <input ref={inputRef} value={text} onChange={handleInput} onKeyDown={(e) => e.key === "Enter" && sendMsg()}
           onFocus={() => setPanelOpen(false)}
-          placeholder="Message…" className="min-w-0 flex-1 rounded-full border border-line bg-canvas px-4 py-2 text-[15px] text-ink outline-none focus:border-accent" />
+          placeholder="Message…" className="min-w-0 flex-1 rounded-full border border-line bg-canvas px-4 py-2.5 text-[15px] text-ink outline-none focus:border-accent" />
 
         <button onClick={() => mediaRef.current?.click()} disabled={uploading} aria-label="Share photo or video"
           className="shrink-0 rounded-full p-1.5 text-subtle disabled:opacity-40">
