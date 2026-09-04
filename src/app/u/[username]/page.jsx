@@ -52,6 +52,22 @@ export default async function ProfilePage({ params }) {
     console.error("highlights query failed:", e?.message);
     highlights = [];
   }
+
+  // Owner-only: their currently active (non-expired) stories, offered when adding a highlight.
+  // Owner-only story archive: ALL of their stories (active + expired), so they can
+  // add any past story to a highlight — like Instagram's archive. Stories are never
+  // hard-deleted (they're only filtered by expiresAt in feeds), so the history is intact.
+  let myStories = [];
+  if (isMe) {
+    try {
+      myStories = await prisma.story.findMany({
+        where: { authorId: user.id },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        select: { id: true, mediaUrl: true, type: true, caption: true, filter: true, expiresAt: true, createdAt: true },
+      });
+    } catch { myStories = []; }
+  }
   let iFollow = false;
 let followState = "none";
 if (!isMe) {
@@ -128,7 +144,7 @@ if (!isMe) {
         </div>
       </div>
 
-      <HighlightsRow highlights={highlights} isMe={isMe} />
+      <HighlightsRow highlights={highlights} isMe={isMe} myStories={myStories} />
 
       <div className="mt-3 flex flex-col gap-3">
         {posts.length === 0 ? (
