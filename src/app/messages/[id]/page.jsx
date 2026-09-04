@@ -17,9 +17,10 @@ export default async function ConversationPage({ params }) {
   if (convo.user1Id !== user.id && convo.user2Id !== user.id) notFound();
 
   const other = convo.user1Id === user.id ? convo.user2 : convo.user1;
+  const clearedAt = convo.user1Id === user.id ? convo.user1ClearedAt : convo.user2ClearedAt;
 
   const messages = await prisma.message.findMany({
-    where: { conversationId: convo.id },
+    where: { conversationId: convo.id, ...(clearedAt && { createdAt: { gt: clearedAt } }) },
     orderBy: { createdAt: "asc" },
     take: 100,
     include: {
@@ -33,7 +34,21 @@ export default async function ConversationPage({ params }) {
       conversationId={convo.id}
       meId={user.id}
       other={{ id: other.id, name: other.name, username: other.username, avatarUrl: other.avatarUrl }}
-      initialMessages={messages.map((m) => ({ id: m.id, senderId: m.senderId, body: m.body, mediaUrl: m.mediaUrl || null, mediaType: m.mediaType || null, storyMediaUrl: m.storyMediaUrl, storyMediaType: m.storyMediaType, reactions: m.reactions, replyToId: m.replyToId, replySnippet: m.replyTo?.body?.slice(0, 80) || null, replyFromMe: m.replyTo ? m.replyTo.senderId === user.id : null, createdAt: m.createdAt }))}
-      />
-    );
+      initialMessages={messages.map((m) => ({
+        id: m.id,
+        senderId: m.senderId,
+        body: m.body,
+        mediaUrl: m.mediaUrl || null,
+        mediaType: m.mediaType || null,
+        storyMediaUrl: m.storyMediaUrl || null,
+        storyMediaType: m.storyMediaType || null,
+        deletedAt: m.deletedAt || null,
+        reactions: m.reactions,
+        replyToId: m.replyToId,
+        replySnippet: m.replyTo?.body?.slice(0, 80) || null,
+        replyFromMe: m.replyTo ? m.replyTo.senderId === user.id : null,
+        createdAt: m.createdAt,
+      }))}
+    />
+  );
 }

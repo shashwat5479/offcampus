@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Avatar from "./Avatar";
 import { uploadFile } from "@/lib/upload";
@@ -58,11 +59,16 @@ function applyReaction(list, { messageId, userId, emoji }) {
   });
 }
 
+function markDeleted(list, id) {
+  return list.map((m) => (m.id === id ? { ...m, deletedAt: new Date().toISOString(), body: "", mediaUrl: null, mediaType: null } : m));
+}
+
 // Favorites persistence
 function getFavs(key) { try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; } }
 function setFavsStore(key, arr) { try { localStorage.setItem(key, JSON.stringify(arr.slice(0, 60))); } catch {} }
 
 export default function ChatRoom({ conversationId, meId, other, initialMessages }) {
+  const router = useRouter();
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -84,6 +90,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   const [saveToast, setSaveToast] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const fileRef = useRef(null);
@@ -103,6 +110,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
       channel = client.channels.get(`conversation:${conversationId}`);
       channel.subscribe("message", (msg) => { setMessages((prev) => (prev.some((m) => m.id === msg.data.id) ? prev : [...prev, msg.data])); });
       channel.subscribe("reaction", (msg) => { setMessages((prev) => applyReaction(prev, msg.data)); });
+      channel.subscribe("delete", (msg) => { setMessages((prev) => markDeleted(prev, msg.data.id)); });
     }).catch(() => {});
     return () => { cancelled = true; if (channel) channel.unsubscribe(); if (client) client.close(); };
   }, [conversationId]);
@@ -154,7 +162,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
     } catch { setText(msg); setReplyTo(currentReply); } finally { setSending(false); }
   }
 
-  // ---- Media (image / video, up to 50MB) ----
+  // ---- Media (image / video — compressed client-side before upload) ----
   async function sendMedia(file) {
     if (!file || uploading) return;
     setUploadErr("");
@@ -164,7 +172,8 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
     setUploading(true); setPanelOpen(false);
     const currentReply = replyTo; setReplyTo(null);
     try {
-      const { url, kind } = await uploadFile(file);
+      const { url, kind, warning } = await uploadFile(file);
+      if (warning) setUploadErr(warning);
       const res = await fetch("/api/message", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ toUserId: other.id, mediaUrl: url, mediaType: kind, replyToId: currentReply?.id || null }),
@@ -236,6 +245,26 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
     try { await fetch("/api/message/react", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messageId, emoji }) }); } catch {}
   }
 
+  // ---- Delete message (own messages only) ----
+  async function deleteMessage(messageId) {
+    setReactFor(null);
+    setMessages((prev) => markDeleted(prev, messageId));
+    try {
+      await fetch("/api/message/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messageId }) });
+    } catch {}
+  }
+
+  // ---- Delete chat (clears MY history only, not the other person's) ----
+  async function clearChat() {
+    setMenuOpen(false);
+    if (!confirm("Delete this chat? This clears your message history here — it won't remove it for " + other.name + ".")) return;
+    try {
+      await fetch("/api/message/clear", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ conversationId }) });
+      setMessages([]);
+      router.refresh();
+    } catch {}
+  }
+
   // ---- Mentions ----
   function handleInput(e) {
     setText(e.target.value);
@@ -271,6 +300,22 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
           className={`rounded-full p-2 ${showSearch ? "text-accent" : "text-subtle"}`}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/><path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
         </button>
+        <div className="relative">
+          <button onClick={() => setMenuOpen((v) => !v)} className="rounded-full p-2 text-subtle" aria-label="Chat options">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="19" r="1.3" fill="currentColor"/></svg>
+          </button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 top-10 z-20 w-44 rounded-xl border border-line bg-paper py-1 shadow-lg">
+                <button onClick={clearChat} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-up hover:bg-canvas">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+                  Delete chat
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {showSearch && (
@@ -286,21 +331,41 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-2 py-4">
         <div className="flex flex-col gap-1.5">
+          {messages.length === 0 && <p className="py-10 text-center text-sm text-faint">No messages here yet.</p>}
           {query && visible.length === 0 && <p className="py-8 text-center text-sm text-faint">No messages match.</p>}
           {visible.map((m) => {
             const mine = m.senderId === meId;
             const reactions = m.reactions || [];
             const emojis = [...new Set(reactions.map((r) => r.emoji))];
+            const deleted = !!m.deletedAt;
             return (
               <div key={m.id} className={`group flex items-end gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
                 {!mine && <Avatar name={other.name} seed={other.id} src={other.avatarUrl} size={26} />}
                 <div className={`relative flex max-w-[72%] flex-col ${mine ? "items-end" : "items-start"}`}>
-                  {m.replySnippet && (
+
+                  {/* Story-reply thumbnail — the small image/video of the story being replied to */}
+                  {m.storyMediaUrl && !deleted && (
+                    <div className={`mb-1 flex items-center gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
+                      {m.storyMediaType === "VIDEO" ? (
+                        <video src={m.storyMediaUrl} muted className="h-14 w-10 shrink-0 rounded-lg border border-line object-cover" />
+                      ) : (
+                        <img src={m.storyMediaUrl} alt="Story" className="h-14 w-10 shrink-0 rounded-lg border border-line object-cover" />
+                      )}
+                      <span className="text-[11px] text-faint">{mine ? "Replied to their story" : "Replied to your story"}</span>
+                    </div>
+                  )}
+
+                  {m.replySnippet && !deleted && (
                     <div className="mb-0.5 max-w-full truncate rounded-lg border-l-2 border-accent bg-canvas/60 px-2 py-1 text-[11px] text-subtle">
                       <span className="text-faint">{m.replyFromMe ? "You" : other.name}: </span>{m.replySnippet}
                     </div>
                   )}
-                  {m.mediaUrl ? (
+
+                  {deleted ? (
+                    <div className={`rounded-2xl bg-canvas px-3.5 py-2 text-sm italic text-faint ${mine ? "rounded-br-md" : "rounded-bl-md"}`}>
+                      🚫 Message deleted
+                    </div>
+                  ) : m.mediaUrl ? (
                     m.mediaType === "VIDEO" ? (
                       <video src={m.mediaUrl} controls playsInline preload="metadata"
                         className={`max-h-[320px] max-w-[240px] rounded-2xl bg-black ${mine ? "rounded-br-md" : "rounded-bl-md"}`} />
@@ -317,26 +382,33 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
                   ) : (
                     <div className={`rounded-2xl px-3.5 py-2 text-sm ${mine ? "rounded-br-md bg-accent text-white" : "rounded-bl-md bg-canvas text-ink"}`}>{m.body}</div>
                   )}
+
                   <span className="mt-0.5 px-1 text-[10px] text-faint" suppressHydrationWarning>{fmtTime(m.createdAt)}</span>
-                  {emojis.length > 0 && (
+                  {!deleted && emojis.length > 0 && (
                     <div className={`-mt-1 ${mine ? "self-start" : "self-end"} z-10`}>
                       <span className="rounded-full border border-line bg-paper px-1.5 py-0.5 text-xs shadow-sm">{emojis.join("")}{reactions.length > 1 ? ` ${reactions.length}` : ""}</span>
                     </div>
                   )}
-                  {/* Reaction + reply + save bar */}
-                  <div className={`absolute top-1/2 -translate-y-1/2 ${mine ? "right-full mr-1" : "left-full ml-1"}`}>
-                    {reactFor === m.id ? (
-                      <div className="flex items-center gap-0.5 rounded-full border border-line bg-paper px-1.5 py-1 shadow-lg">
-                        {REACTIONS.map((e) => <button key={e} onClick={() => react(m.id, e)} className="text-base hover:scale-125">{e}</button>)}
-                        <button onClick={() => { setReplyTo({ id: m.id, body: m.body, mine }); setReactFor(null); }} className="ml-1 border-l border-line pl-1.5 text-xs text-subtle">↩</button>
-                        {!mine && (isGif(m.body) || isSingleEmoji(m.body)) && (
-                          <button onClick={() => { saveReceivedToFav(m.body); setReactFor(null); }} className="ml-1 border-l border-line pl-1.5 text-xs text-subtle">★</button>
-                        )}
-                      </div>
-                    ) : (
-                      <button onClick={() => setReactFor(m.id)} className="text-sm text-faint opacity-0 group-hover:opacity-100">☺</button>
-                    )}
-                  </div>
+
+                  {/* Reaction + reply + save + delete bar */}
+                  {!deleted && (
+                    <div className={`absolute top-1/2 -translate-y-1/2 ${mine ? "right-full mr-1" : "left-full ml-1"}`}>
+                      {reactFor === m.id ? (
+                        <div className="flex items-center gap-0.5 rounded-full border border-line bg-paper px-1.5 py-1 shadow-lg">
+                          {REACTIONS.map((e) => <button key={e} onClick={() => react(m.id, e)} className="text-base hover:scale-125">{e}</button>)}
+                          <button onClick={() => { setReplyTo({ id: m.id, body: m.body, mine }); setReactFor(null); }} className="ml-1 border-l border-line pl-1.5 text-xs text-subtle">↩</button>
+                          {!mine && (isGif(m.body) || isSingleEmoji(m.body)) && (
+                            <button onClick={() => { saveReceivedToFav(m.body); setReactFor(null); }} className="ml-1 border-l border-line pl-1.5 text-xs text-subtle">★</button>
+                          )}
+                          {mine && (
+                            <button onClick={() => deleteMessage(m.id)} className="ml-1 border-l border-line pl-1.5 text-xs text-up">🗑</button>
+                          )}
+                        </div>
+                      ) : (
+                        <button onClick={() => setReactFor(m.id)} className="text-sm text-faint opacity-0 group-hover:opacity-100">☺</button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -369,7 +441,6 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
       {/* ===== WhatsApp-style panel with 3 tabs ===== */}
       {panelOpen && (
         <div className="border-t border-line bg-paper">
-          {/* Tab bar */}
           <div className="flex border-b border-line">
             {[["emoji","😊 Emoji"],["sticker","🎭 Stickers"],["gif","GIF"]].map(([id, label]) => (
               <button key={id} onClick={() => openTab(id)}
@@ -377,7 +448,6 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
             ))}
           </div>
 
-          {/* EMOJI tab */}
           {panelTab === "emoji" && (
             <div>
               <div className="flex gap-1 overflow-x-auto border-b border-line px-2 py-1">
@@ -394,7 +464,6 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
             </div>
           )}
 
-          {/* STICKER tab */}
           {panelTab === "sticker" && (
             <div>
               <div className="flex gap-1 overflow-x-auto border-b border-line px-2 py-1">
@@ -442,7 +511,6 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
             </div>
           )}
 
-          {/* GIF tab */}
           {panelTab === "gif" && (
             <div>
               <div className="flex gap-1 overflow-x-auto border-b border-line px-2 py-1">
@@ -493,7 +561,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
         </div>
       )}
 
-      {/* Upload error toast */}
+      {/* Upload error / warning toast */}
       {uploadErr && (
         <div className="mx-auto mb-1 rounded-full bg-up/15 px-3 py-1 text-center text-xs font-medium text-up">{uploadErr}</div>
       )}
