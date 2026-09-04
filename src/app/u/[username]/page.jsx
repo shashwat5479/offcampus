@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import Avatar from "@/components/Avatar";
 import FollowButton from "@/components/FollowButton";
 import PostCard from "@/components/PostCard";
+import HighlightsRow from "@/components/HighlightsRow";
 import MessageButton from "@/components/MessageButton";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,13 @@ export default async function ProfilePage({ params }) {
   });
 
   const isMe = me.id === user.id;
+
+  const highlights = await prisma.storyHighlight.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: { id: true, title: true, coverUrl: true, mediaUrl: true, mediaType: true, caption: true, filter: true },
+  });
   let iFollow = false;
 let followState = "none";
 if (!isMe) {
@@ -111,6 +119,8 @@ if (!isMe) {
           </div>
         </div>
       </div>
+
+      <HighlightsRow highlights={highlights} isMe={isMe} />
 
       <div className="mt-3 flex flex-col gap-3">
         {posts.length === 0 ? (

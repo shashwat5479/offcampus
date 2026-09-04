@@ -53,6 +53,7 @@ model User {
   createdAt DateTime @default(now())
 
   @@index([collegeId])
+  highlights   StoryHighlight[] @relation("userHighlights")
 }
 
 model College {
@@ -404,4 +405,19 @@ model MessageReaction {
 
   @@unique([messageId, userId])
   @@index([messageId])
+}
+
+model StoryHighlight {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("userHighlights", fields: [userId], references: [id], onDelete: Cascade)
+  title     String   @default("Highlight")
+  coverUrl  String
+  mediaUrl  String
+  mediaType String   @default("IMAGE")
+  caption   String?
+  filter    String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }

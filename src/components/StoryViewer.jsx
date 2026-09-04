@@ -100,6 +100,24 @@ export default function StoryViewer({ author, stories, isOwner }) {
     } catch {}
   }
 
+  const [savedHL, setSavedHL] = useState(false);
+  async function saveHighlight() {
+    if (savedHL) return;
+    try {
+      const res = await fetch("/api/highlight", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mediaUrl: cur.mediaUrl,
+          mediaType: cur.type,
+          caption: cur.caption || null,
+          filter: cur.filter || null,
+        }),
+      });
+      if (res.ok) setSavedHL(true);
+    } catch {}
+  }
+
   async function deleteStory() {
     if (!confirm("Delete this story? This can't be undone.")) return;
     try {
@@ -200,6 +218,21 @@ export default function StoryViewer({ author, stories, isOwner }) {
             aria-label="Delete story"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </button>
+        )}
+        {isOwner && (
+          <button
+            onClick={saveHighlight}
+            className="absolute right-14 top-12 z-30 rounded-full bg-black/40 p-2 text-white/90 backdrop-blur"
+            style={{ top: "calc(3rem + env(safe-area-inset-top))" }}
+            aria-label="Save to highlights"
+            title="Save to highlights"
+          >
+            {savedHL ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a2 2 0 0 0-2 2v18l8-4 8 4V4a2 2 0 0 0-2-2z"/></svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            )}
           </button>
         )}
 
