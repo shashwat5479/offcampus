@@ -38,12 +38,20 @@ export default async function ProfilePage({ params }) {
 
   const isMe = me.id === user.id;
 
-  const highlights = await prisma.storyHighlight.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-    select: { id: true, title: true, coverUrl: true, mediaUrl: true, mediaType: true, caption: true, filter: true },
-  });
+  // Crash-proof: if the StoryHighlight table isn't migrated yet (or any DB hiccup),
+  // show zero highlights instead of taking down the whole profile page.
+  let highlights = [];
+  try {
+    highlights = await prisma.storyHighlight.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      select: { id: true, title: true, coverUrl: true, mediaUrl: true, mediaType: true, caption: true, filter: true },
+    });
+  } catch (e) {
+    console.error("highlights query failed:", e?.message);
+    highlights = [];
+  }
   let iFollow = false;
 let followState = "none";
 if (!isMe) {
