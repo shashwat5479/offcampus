@@ -18,6 +18,7 @@ export default function HighlightsRow({ highlights, isMe, myStories = [] }) {
   const [picked, setPicked] = useState(null);
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saveErr, setSaveErr] = useState("");
 
   async function remove(id, e) {
     e.stopPropagation();
@@ -30,7 +31,7 @@ export default function HighlightsRow({ highlights, isMe, myStories = [] }) {
 
   async function saveHighlight() {
     if (!picked || saving) return;
-    setSaving(true);
+    setSaving(true); setSaveErr("");
     try {
       const res = await fetch("/api/highlight", {
         method: "POST",
@@ -44,10 +45,13 @@ export default function HighlightsRow({ highlights, isMe, myStories = [] }) {
         }),
       });
       if (res.ok) {
-        setAdding(false); setPicked(null); setTitle("");
+        setAdding(false); setPicked(null); setTitle(""); setSaveErr("");
         router.refresh();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setSaveErr(d.error || "Couldn't save — the highlights table may not be set up yet.");
       }
-    } catch {} finally { setSaving(false); }
+    } catch { setSaveErr("Network error. Try again."); } finally { setSaving(false); }
   }
 
   const hasRow = (items && items.length > 0) || isMe;
@@ -81,12 +85,13 @@ export default function HighlightsRow({ highlights, isMe, myStories = [] }) {
       {/* Add-highlight picker */}
       {adding && (
         <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/60 sm:items-center" onClick={() => setAdding(false)}>
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-2xl border border-line bg-paper p-4 sm:rounded-2xl">
-            <div className="mb-3 flex items-center justify-between">
+          <div onClick={(e) => e.stopPropagation()} className="flex max-h-[85vh] w-full max-w-md flex-col rounded-t-2xl border border-line bg-paper sm:rounded-2xl">
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <h3 className="text-sm font-semibold text-ink">New Highlight</h3>
               <button onClick={() => setAdding(false)} className="text-lg text-subtle">✕</button>
             </div>
 
+            <div className="flex-1 overflow-y-auto px-4 py-3">
             {myStories.length === 0 ? (
               <p className="py-8 text-center text-sm text-subtle">
                 No stories yet.<br />
@@ -112,11 +117,17 @@ export default function HighlightsRow({ highlights, isMe, myStories = [] }) {
                 </div>
                 <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={30} placeholder="Highlight name (e.g. Trip)"
                   className="mt-3 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent" />
+              </>
+            )}
+            </div>
+            {myStories.length > 0 && (
+              <div className="border-t border-line px-4 py-3">
+                {saveErr && <p className="mb-2 text-center text-xs text-up">{saveErr}</p>}
                 <button onClick={saveHighlight} disabled={!picked || saving}
-                  className="mt-3 w-full rounded-full bg-accent py-2.5 text-sm font-semibold text-white disabled:opacity-50">
+                  className="w-full rounded-full bg-accent py-2.5 text-sm font-semibold text-white disabled:opacity-50">
                   {saving ? "Saving…" : "Add to highlights"}
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>

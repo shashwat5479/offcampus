@@ -11,19 +11,26 @@ export async function POST(request) {
   const { mediaUrl, mediaType, caption, filter, title } = body;
   if (!mediaUrl) return NextResponse.json({ error: "Missing media." }, { status: 400 });
 
-  const highlight = await prisma.storyHighlight.create({
-    data: {
-      userId: user.id,
-      title: (title || "Highlight").slice(0, 30),
-      coverUrl: mediaUrl,
-      mediaUrl,
-      mediaType: mediaType === "VIDEO" ? "VIDEO" : "IMAGE",
-      caption: caption || null,
-      filter: filter || null,
-    },
-  });
-
-  return NextResponse.json({ ok: true, id: highlight.id });
+  try {
+    const highlight = await prisma.storyHighlight.create({
+      data: {
+        userId: user.id,
+        title: (title || "Highlight").slice(0, 30),
+        coverUrl: mediaUrl,
+        mediaUrl,
+        mediaType: mediaType === "VIDEO" ? "VIDEO" : "IMAGE",
+        caption: caption || null,
+        filter: filter || null,
+      },
+    });
+    return NextResponse.json({ ok: true, id: highlight.id });
+  } catch (e) {
+    console.error("highlight create failed:", e?.message);
+    return NextResponse.json(
+      { error: "Highlights aren't set up on the server yet. Run: npx prisma db push" },
+      { status: 503 }
+    );
+  }
 }
 
 // Remove a highlight you own.
