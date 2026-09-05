@@ -287,7 +287,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
   const isCustomSticker = (b) => b?.startsWith("data:image/");
 
   return (
-    <div className="mx-auto flex h-[100dvh] w-full max-w-2xl flex-col bg-canvas">
+    <div className="mx-auto flex h-[100dvh] w-full max-w-2xl flex-col bg-canvas lg:h-full lg:max-w-none">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-line px-2 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
         <Link href="/messages" className="text-lg text-subtle hover:text-ink">←</Link>
