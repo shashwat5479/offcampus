@@ -13,7 +13,7 @@ export default async function MessagesPage() {
   return (
     <>
       {/* Mobile: full conversation list */}
-      <div className="w-full px-1 py-2 lg:hidden">
+      <div className="h-full w-full overflow-y-auto px-1 py-2 lg:hidden">
         <ConversationList convos={convos} meId={user.id} />
       </div>
       {/* Desktop: list lives in the sidebar, so show a friendly empty state here */}
