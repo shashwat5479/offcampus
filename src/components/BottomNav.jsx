@@ -16,7 +16,7 @@ export default function BottomNav({ user }) {
   if (!user) return null;
 
   // Hide on stories, chats, and story creation
-  if (pathname.startsWith("/story/") || pathname.match(/^\/messages\/.+/)) return null;
+  if (pathname.startsWith("/story/") || pathname.startsWith("/messages")) return null;
 
   const isActive = (href) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   const profileActive = pathname === `/u/${user.username}`;

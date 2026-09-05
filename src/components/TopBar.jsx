@@ -58,7 +58,7 @@ export default function TopBar({ user, unread }) {
     router.push(t ? `/search?q=${encodeURIComponent(t)}` : "/search");
   }
 
-  if (pathname.startsWith("/story/") || pathname.match(/^\/messages\/.+/)) return null;
+  if (pathname.startsWith("/story/") || pathname.startsWith("/messages")) return null;
 
   return (
     <>

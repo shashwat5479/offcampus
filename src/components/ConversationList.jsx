@@ -18,7 +18,10 @@ function previewOf(msg, mine) {
 export default function ConversationList({ convos, meId, activeId }) {
   return (
     <div className="flex flex-col">
-      <h1 className="mb-2 px-3 pt-1 text-xl font-semibold tracking-tight">Messages</h1>
+      <div className="mb-2 flex items-center gap-2 px-3 pt-1">
+        <Link href="/" className="text-lg text-subtle hover:text-ink lg:hidden" aria-label="Back">←</Link>
+        <h1 className="text-xl font-semibold tracking-tight">Messages</h1>
+      </div>
       {convos.length === 0 && (
         <p className="m-2 rounded-xl2 border border-line bg-paper p-6 text-center text-sm text-subtle">
           No conversations yet. Message someone from their profile.
