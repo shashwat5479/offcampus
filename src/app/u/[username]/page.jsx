@@ -6,6 +6,7 @@ import Avatar from "@/components/Avatar";
 import FollowButton from "@/components/FollowButton";
 import PostCard from "@/components/PostCard";
 import HighlightsRow from "@/components/HighlightsRow";
+import ProfileTabs from "@/components/ProfileTabs";
 import MessageButton from "@/components/MessageButton";
 
 export const dynamic = "force-dynamic";
@@ -144,15 +145,35 @@ if (!isMe) {
         </div>
       </div>
 
-      <HighlightsRow highlights={highlights} isMe={isMe} myStories={myStories} />
-
-      <div className="mt-3 flex flex-col gap-3">
-        {posts.length === 0 ? (
-          <p className="rounded-xl2 border border-line bg-paper p-8 text-center text-sm text-subtle">No posts yet.</p>
-        ) : (
-          posts.map((post) => <PostCard key={post.id} post={post} dir={dirByPost[post.id] || 0} viewerId={me.id} />)
-        )}
-      </div>
+      <ProfileTabs
+        tabs={[
+          { key: "posts", label: "Posts", icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          ) },
+          { key: "highlights", label: "Highlights", icon: (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          ) },
+        ]}
+        panels={{
+          posts: (
+            <div className="mt-3 flex flex-col gap-3">
+              {posts.length === 0 ? (
+                <p className="rounded-xl2 border border-line bg-paper p-8 text-center text-sm text-subtle">No posts yet.</p>
+              ) : (
+                posts.map((post) => <PostCard key={post.id} post={post} dir={dirByPost[post.id] || 0} viewerId={me.id} />)
+              )}
+            </div>
+          ),
+          highlights: (
+            <div className="mt-3">
+              <HighlightsRow highlights={highlights} isMe={isMe} myStories={myStories} />
+              {highlights.length === 0 && !isMe && (
+                <p className="rounded-xl2 border border-line bg-paper p-8 text-center text-sm text-subtle">No highlights yet.</p>
+              )}
+            </div>
+          ),
+        }}
+      />
     </div>
   );
 }
