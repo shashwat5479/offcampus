@@ -1,35 +1,41 @@
 import Link from "next/link";
+import Avatar from "./Avatar";
 import VoteButtons from "./VoteButtons";
 import ShareButton from "./ShareButton";
-import PostMenu from "./PostMenu";
+import PostCardShell from "./PostCardShell";
 import { timeAgo } from "@/lib/format";
 
 export default function PostCard({ post, dir = 0, viewerId }) {
   const college = post.community?.college;
   const commentCount = post._count?.comments ?? 0;
-  const tags = post.tags?.map((t) => t.tag) ?? [];
   const isOwner = viewerId && post.author?.id === viewerId;
 
-  return (
+  const card = (
     <article className="flex gap-3 rounded-xl2 border border-line bg-paper p-4 transition-colors hover:border-faint">
       <VoteButtons postId={post.id} initialScore={post.score} initialDir={dir} />
 
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-subtle">
-          {post.community ? (
-            <Link href={`/c/${post.community.slug}`} className="font-semibold text-ink hover:underline">
-              {college?.code ? `${college.code} · ` : ""}{post.community.name}
-            </Link>
-          ) : (
-            <span className="font-semibold text-ink">Personal</span>
-          )}
-          <span className="text-faint">•</span>
-          <Link href={`/u/${post.author.username}`} className="hover:underline">
-            @{post.author.username}
+        <div className="mb-1.5 flex items-center gap-2">
+          {/* Author avatar — clickable to their profile */}
+          <Link href={`/u/${post.author.username}`} className="shrink-0" aria-label={`@${post.author.username}`}>
+            <span className="block overflow-hidden rounded-full ring-1 ring-line transition-transform hover:scale-105">
+              <Avatar name={post.author.name} seed={post.author.id} src={post.author.avatarUrl} size={34} />
+            </span>
           </Link>
-          <span className="text-faint">• {timeAgo(post.createdAt)}</span>
-          <span className="ml-1 rounded bg-canvas px-1.5 py-0.5 text-[10px] font-medium text-faint">{post.type}</span>
-          {isOwner && <span className="ml-auto"><PostMenu postId={post.id} /></span>}
+          <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 text-xs text-subtle">
+            {post.community ? (
+              <Link href={`/c/${post.community.slug}`} className="font-semibold text-ink hover:underline">
+                {college?.code ? `${college.code} · ` : ""}{post.community.name}
+              </Link>
+            ) : (
+              <span className="font-semibold text-ink">Personal</span>
+            )}
+            <span className="text-faint">•</span>
+            <Link href={`/u/${post.author.username}`} className="hover:underline">
+              @{post.author.username}
+            </Link>
+            <span className="text-faint">• {timeAgo(post.createdAt)}</span>
+          </div>
         </div>
 
         <Link href={`/post/${post.id}`} className="block">
@@ -47,11 +53,6 @@ export default function PostCard({ post, dir = 0, viewerId }) {
         ) : null}
 
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-          {tags.map((tag) => (
-            <Link key={tag} href={`/search?q=${encodeURIComponent(tag)}`} className="rounded-full bg-canvas px-2 py-0.5 text-[11px] font-medium text-subtle hover:text-ink">
-              #{tag}
-            </Link>
-          ))}
           <div className="ml-auto flex items-center gap-3">
             <Link href={`/post/${post.id}`} className="flex items-center gap-1 text-xs font-medium text-subtle hover:text-ink">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -65,4 +66,6 @@ export default function PostCard({ post, dir = 0, viewerId }) {
       </div>
     </article>
   );
+
+  return isOwner ? <PostCardShell postId={post.id}>{card}</PostCardShell> : card;
 }

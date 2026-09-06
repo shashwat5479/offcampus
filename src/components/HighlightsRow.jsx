@@ -23,10 +23,14 @@ export default function HighlightsRow({ highlights, isMe, myStories = [] }) {
   async function remove(id, e) {
     e.stopPropagation();
     if (!confirm("Remove this highlight?")) return;
+    // Optimistic: remove instantly, then confirm with the server; restore on failure.
+    const prev = items;
+    setItems((list) => list.filter((h) => h.id !== id));
+    setViewing(null);
     try {
       const res = await fetch(`/api/highlight?id=${id}`, { method: "DELETE" });
-      if (res.ok) { setItems((prev) => prev.filter((h) => h.id !== id)); setViewing(null); }
-    } catch {}
+      if (!res.ok) setItems(prev); // revert
+    } catch { setItems(prev); }
   }
 
   async function saveHighlight() {
