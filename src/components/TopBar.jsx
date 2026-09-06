@@ -62,7 +62,7 @@ export default function TopBar({ user, unread }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur lg:hidden">
+      <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur lg:pl-[240px]">
         <div className="mx-auto flex h-16 w-full max-w-shell items-center gap-2 px-3">
           {/* Hamburger → left drawer */}
           <button
@@ -74,7 +74,7 @@ export default function TopBar({ user, unread }) {
           </button>
 
           {/* Wordmark — corner brand */}
-          <Link href="/" className="mr-1 hidden shrink-0 items-center sm:flex">
+          <Link href="/" className="mr-1 hidden shrink-0 items-center sm:flex lg:hidden">
             <span className="font-display text-[19px] font-bold tracking-tight text-ink">OffCampus</span>
           </Link>
 
@@ -125,7 +125,7 @@ export default function TopBar({ user, unread }) {
           </div>
 
           {/* Messages + Notifications — pushed hard right */}
-          <div className="ml-auto flex shrink-0 items-center gap-1">
+          <div className="ml-auto flex shrink-0 items-center gap-1 lg:hidden">
             {user ? (
               <>
                 <Link href="/messages" aria-label="Messages" className="flex h-9 w-9 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink">
