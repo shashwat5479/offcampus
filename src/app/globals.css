@@ -98,41 +98,43 @@ a { color: inherit; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .animate-fade-in { animation: fadeIn 0.2s ease-out both; }
 
-/* --- oc-smooth-additions --- */
-/* Buttons and links ease their color/opacity by default for a smoother feel */
-a, button {
-  transition: color 0.18s ease, background-color 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+
+/* ============================================================
+   Motion system — clean, fast, GPU-friendly.
+   Only transform + opacity are animated (cheap for the browser),
+   durations kept short (120–200ms) so the UI feels snappy, not sluggish.
+   ============================================================ */
+
+/* Crisp text everywhere */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
-/* Momentum scrolling on touch */
-* { -webkit-overflow-scrolling: touch; }
 
-/* Gentle fade-up for feed items */
-@keyframes ocCardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.oc-card-in { animation: ocCardIn 0.28s ease-out both; }
+/* Interactive elements: fast, consistent easing. Color/opacity/transform only. */
+a, button, [role="button"], input, textarea, select, summary {
+  transition:
+    color .15s ease,
+    background-color .15s ease,
+    border-color .15s ease,
+    opacity .15s ease,
+    box-shadow .15s ease,
+    transform .15s cubic-bezier(.2,.8,.2,1);
+}
 
-/* Smooth collapse for deleted items */
-@keyframes ocCollapse { to { opacity: 0; transform: scale(0.96); } }
-.oc-collapsing { animation: ocCollapse 0.18s ease forwards; }
+/* Subtle press feedback (fast) */
+button:active, a:active, [role="button"]:active { transform: scale(.97); }
 
+/* Feed / card entrance — applied via .oc-in where wanted (short, gentle) */
+@keyframes ocIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.oc-in { animation: ocIn .2s cubic-bezier(.2,.8,.2,1) both; }
+
+/* Smooth collapse on delete */
+@keyframes ocCollapse { to { opacity: 0; transform: scale(.96); } }
+.oc-collapsing { animation: ocCollapse .16s ease forwards; }
+
+/* Respect reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .oc-card-in, .oc-collapsing { animation: none !important; }
-}
-
-
-/* --- oc-ultra-smooth --- */
-html { scroll-behavior: smooth; }
-body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-
-/* Smooth, consistent easing on all interactive elements */
-a, button, [role="button"], input, textarea, select {
-  transition: color .18s ease, background-color .18s ease, border-color .18s ease, opacity .18s ease, transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease;
-}
-a:active, button:active { transform: scale(.98); }
-
-/* Gentle page-content fade-in on route load */
-main > * { animation: ocPageIn .32s cubic-bezier(.2,.8,.2,1) both; }
-@keyframes ocPageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-@media (prefers-reduced-motion: reduce) {
-  main > *, a:active, button:active { animation: none !important; transform: none !important; }
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }
