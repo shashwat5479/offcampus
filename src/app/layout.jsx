@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
+import SideNav from "@/components/SideNav";
 
 const sans = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display", display: "swap" });
@@ -30,8 +31,9 @@ export default async function RootLayout({ children }) {
               "try{var t=localStorage.getItem('theme');if(t!=='light'){document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}",
           }}
         />
+        <SideNav user={clientUser} />
         <TopBar user={clientUser} unread={unread} />
-        <main className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-28">{children}</main>
+        <main className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-28 lg:pl-[256px] lg:pb-8">{children}</main>
         <BottomNav user={clientUser} />
       </body>
     </html>

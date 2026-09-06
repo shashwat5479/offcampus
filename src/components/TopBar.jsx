@@ -62,13 +62,13 @@ export default function TopBar({ user, unread }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur lg:hidden">
         <div className="mx-auto flex h-16 w-full max-w-shell items-center gap-2 px-3">
           {/* Hamburger → left drawer */}
           <button
             onClick={() => setMenuOpen(true)}
             aria-label="Menu"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-subtle transition-colors hover:bg-canvas hover:text-ink lg:hidden"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
           </button>

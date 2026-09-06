@@ -117,3 +117,22 @@ a, button {
 @media (prefers-reduced-motion: reduce) {
   .oc-card-in, .oc-collapsing { animation: none !important; }
 }
+
+
+/* --- oc-ultra-smooth --- */
+html { scroll-behavior: smooth; }
+body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+/* Smooth, consistent easing on all interactive elements */
+a, button, [role="button"], input, textarea, select {
+  transition: color .18s ease, background-color .18s ease, border-color .18s ease, opacity .18s ease, transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease;
+}
+a:active, button:active { transform: scale(.98); }
+
+/* Gentle page-content fade-in on route load */
+main > * { animation: ocPageIn .32s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes ocPageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  main > *, a:active, button:active { animation: none !important; transform: none !important; }
+}
