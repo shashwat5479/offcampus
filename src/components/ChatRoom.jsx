@@ -172,7 +172,7 @@ export default function ChatRoom({ conversationId, meId, other, initialMessages 
     setUploading(true); setPanelOpen(false);
     const currentReply = replyTo; setReplyTo(null);
     try {
-      const { url, kind, warning } = await uploadFile(file);
+      const { url, kind, warning } = await uploadFile(file, { kind: "chat" });
       if (warning) setUploadErr(warning);
       const res = await fetch("/api/message", {
         method: "POST", headers: { "Content-Type": "application/json" },

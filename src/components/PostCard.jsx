@@ -52,7 +52,7 @@ export default function PostCard({ post, dir = 0, viewerId }) {
         {caption ? (
           <Link href={`/post/${post.id}`} className="mt-2 block">
             <p className="line-clamp-3 text-sm text-ink">
-              <span className="font-semibold">{post.author.username}</span>{" "}{caption}
+              <span className="font-bold text-ink">{post.author.username}</span>{" "}<span className="font-normal text-subtle">{caption}</span>
             </p>
           </Link>
         ) : null}

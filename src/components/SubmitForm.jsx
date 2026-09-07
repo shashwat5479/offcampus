@@ -25,7 +25,7 @@ export default function SubmitForm({ communities = [] }) {
     setUploading(true);
     setError("");
     try {
-      const { url } = await uploadFile(file);
+      const { url } = await uploadFile(file, { kind: "post" });
       setForm((f) => ({ ...f, mediaUrl: url }));
     } catch (err) {
       setError(err.message || "Upload failed.");

@@ -62,7 +62,7 @@ export default function TopBar({ user, unread }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur lg:pl-[240px]">
+      <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur lg:static lg:border-b-0 lg:bg-transparent lg:pl-[240px] lg:backdrop-blur-none">
         <div className="mx-auto flex h-16 w-full max-w-shell items-center gap-2 px-3">
           {/* Hamburger → left drawer */}
           <button

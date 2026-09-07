@@ -153,7 +153,7 @@ export default function AddStoryPage() {
     setBusy(true); setErr("");
     if (audioRef.current) audioRef.current.pause();
     try {
-      const { url, kind: k } = await uploadFile(file);
+      const { url, kind: k } = await uploadFile(file, { kind: "story" });
       const res = await fetch("/api/story", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

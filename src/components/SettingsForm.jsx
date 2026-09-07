@@ -40,7 +40,7 @@ export default function SettingsForm({ initial }) {
     setUploading(true);
     setErr("");
     try {
-      const { url } = await uploadFile(file);
+      const { url } = await uploadFile(file, { kind: "avatar" });
       setForm((f) => ({ ...f, avatarUrl: url }));   // or however your form stores it
     } catch (e2) {
       setErr(e2.message || "Upload failed.");
